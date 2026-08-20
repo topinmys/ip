@@ -12,6 +12,9 @@ public class Shai {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        String[] tasks = new String[100];
+        int taskCount = 0;
+
         String banner = LINE + "\n"
                 + "\t  ____  _           _\n"
                 + "\t / ___|| |__   __ _(_)\n"
@@ -35,7 +38,15 @@ public class Shai {
                 break;
             }
 
-            System.out.println("\t" + command);
+            if (command.equals("list")) {
+                for (int i = 1; i <= taskCount; i++){
+                    System.out.println("\t" + i + ". " + tasks[i-1]);
+                }
+                System.out.println(LINE);
+                continue;
+            }
+            System.out.println("\tadded: " + command);
+            tasks[taskCount++] = command;
             System.out.println(LINE);
         }
     }
