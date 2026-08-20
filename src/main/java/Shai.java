@@ -63,6 +63,16 @@ public class Shai {
                     System.out.println(LINE + "\n");
                     continue;
                 }
+
+                String cmd2 = command.substring(0, 6);
+                if (cmd2.equals("unmark")) {
+                    System.out.println("\tOK, I've marked this task as not done yet:");
+                    int index = Integer.valueOf(command.substring(7,8));
+                    done[index - 1] = false;
+                    System.out.println("\t  [ ] " + tasks[index - 1]);
+                    System.out.println(LINE + "\n");
+                    continue;
+                }
             }
             System.out.println("\tadded: " + command);
             tasks[taskCount++] = command;
