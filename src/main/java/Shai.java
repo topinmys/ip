@@ -12,9 +12,8 @@ public class Shai {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        String[] tasks = new String[100];
         int taskCount = 0;
-        boolean[] done = new boolean[100];
+        Task[] tasks = new Task[100];
 
         String banner = LINE + "\n"
                 + "\t  ____  _           _\n"
@@ -43,39 +42,34 @@ public class Shai {
             if (command.equals("list")) {
                 System.out.println("\tHere are the tasks in your list:");
                 for (int i = 1; i <= taskCount; i++){
-                    char mark = ' ';
-                    if (done[i-1]) {
-                        mark = 'X';
-                    }
-                    System.out.println("\t" + i + ".[" + mark + "] " + tasks[i-1]);
+                    System.out.println("\t" + i + "." + tasks[i-1]);
                 }
                 System.out.println(LINE + "\n");
                 continue;
             }
 
-            if (command.length() >= 4) {
-                String cmd = command.substring(0, 4);
-                if (cmd.equals("mark")) {
-                    System.out.println("\tNice! I've marked this task as done:");
-                    int index = Integer.valueOf(command.substring(5, 6));
-                    done[index - 1] = true;
-                    System.out.println("\t  [X] " + tasks[index - 1]);
-                    System.out.println(LINE + "\n");
-                    continue;
-                }
+            if (command.startsWith("mark ")) {
+                System.out.println("\tNice! I've marked this task as done:");
+                int index = Integer.parseInt(command.substring(5).trim());
+                Task t = tasks[index - 1];
+                t.markAsDone();
+                System.out.println("\t  " + t);
+                System.out.println(LINE + "\n");
+                continue;
+            }
 
-                String cmd2 = command.substring(0, 6);
-                if (cmd2.equals("unmark")) {
-                    System.out.println("\tOK, I've marked this task as not done yet:");
-                    int index = Integer.valueOf(command.substring(7,8));
-                    done[index - 1] = false;
-                    System.out.println("\t  [ ] " + tasks[index - 1]);
-                    System.out.println(LINE + "\n");
-                    continue;
-                }
+            if (command.startsWith("unmark ")) {
+                System.out.println("\tOK, I've marked this task as not done yet:");
+                int index = Integer.parseInt(command.substring(7).trim());
+                Task t = tasks[index - 1];
+                t.unmark();
+                System.out.println("\t  " + t);
+                System.out.println(LINE + "\n");
+                continue;
             }
             System.out.println("\tadded: " + command);
-            tasks[taskCount++] = command;
+            Task t = new Task(command);
+            tasks[taskCount++] = t;
             System.out.println(LINE + "\n");
         }
     }
