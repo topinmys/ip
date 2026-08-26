@@ -312,3 +312,273 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
   ```
+
+## Test Case 8: Delete a middle task
+
+- Aim: Verify that deleting a task removes the selected task and re-numbers the remaining tasks.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo alpha
+  todo beta
+  todo gamma
+  delete 2
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] alpha
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] beta
+	Now you have 2 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] gamma
+	Now you have 3 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Noted. I've removed this task:
+	  [T][ ] beta
+	Now you have 2 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][ ] alpha
+	2.[T][ ] gamma
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 9: Reject invalid delete commands
+
+- Aim: Verify that delete reports errors for a missing number, a non-numeric number, and an out-of-range number without changing the list.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo alpha
+  delete
+  delete abc
+  delete 2
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] alpha
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Please provide a task number after delete.
+	____________________________________________________________
+
+	____________________________________________________________
+	The task number after delete must be a whole number.
+	____________________________________________________________
+
+	____________________________________________________________
+	That task number is not in your list yet.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][ ] alpha
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 10: Valid additions survive invalid input
+
+- Aim: Verify that rejected ToDo, deadline, and event commands do not alter tasks added by valid commands.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo alpha
+  todo
+  deadline beta /by Friday
+  deadline report /by
+  event planning /from 2pm /to 3pm
+  event review /from /to 4pm
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] alpha
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Hold up - I need a description for that todo.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] beta (by: Friday)
+	Now you have 2 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Hold up - I need a date after /by.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [E][ ] planning (from: 2pm to: 3pm)
+	Now you have 3 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Hold up - I need a starting time after /from.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][ ] alpha
+	2.[D][ ] beta (by: Friday)
+	3.[E][ ] planning (from: 2pm to: 3pm)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 11: Task actions preserve state after invalid indexes
+
+- Aim: Verify that an invalid mark or delete number does not change a task's status or remove it.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo alpha
+  mark 1
+  mark 2
+  list
+  delete 0
+  list
+  delete 1
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] alpha
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Nice! I've marked this task as done:
+	  [T][X] alpha
+	____________________________________________________________
+
+	____________________________________________________________
+	That task number is not in your list yet.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][X] alpha
+	____________________________________________________________
+
+	____________________________________________________________
+	That task number is not in your list yet.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][X] alpha
+	____________________________________________________________
+
+	____________________________________________________________
+	Noted. I've removed this task:
+	  [T][X] alpha
+	Now you have 0 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```

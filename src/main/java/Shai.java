@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -12,8 +14,7 @@ public class Shai {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        int taskCount = 0;
-        Task[] tasks = new Task[100];
+        List<Task> tasks = new ArrayList<>();
 
         printBanner();
 
@@ -26,17 +27,19 @@ public class Shai {
                     System.out.println("\tSay less. Stay blessed, peace!");
                     break;
                 } else if (command.equals("list")) {
-                    listTasks(tasks, taskCount);
+                    listTasks(tasks);
                 } else if (isCommand(command, "mark")) {
-                    markTask(command, tasks, taskCount);
+                    markTask(command, tasks);
                 } else if (isCommand(command, "unmark")) {
-                    unmarkTask(command, tasks, taskCount);
+                    unmarkTask(command, tasks);
                 } else if (isCommand(command, "todo")) {
-                    taskCount = addToDo(command, tasks, taskCount);
+                    addToDo(command, tasks);
                 } else if (isCommand(command, "deadline")) {
-                    taskCount = addDeadline(command, tasks, taskCount);
+                    addDeadline(command, tasks);
                 } else if (isCommand(command, "event")) {
-                    taskCount = addEvent(command, tasks, taskCount);
+                    addEvent(command, tasks);
+                } else if (isCommand(command, "delete")) {
+                    deleteTask(command, tasks);
                 } else {
                     throw new ShaiException("Ayy, I don't know that command yet.");
                 }
@@ -65,40 +68,49 @@ public class Shai {
     }
 
     /** Prints every task currently stored in the task list. */
-    private static void listTasks(Task[] tasks, int taskCount) {
+    private static void listTasks(List<Task> tasks) {
         System.out.println("\tHere are the tasks in your list:");
-        for (int i = 1; i <= taskCount; i++) {
-            System.out.println("\t" + i + "." + tasks[i - 1]);
+        for (int i = 1; i <= tasks.size(); i++) {
+            System.out.println("\t" + i + "." + tasks.get(i - 1));
         }
     }
 
     /** Marks the task selected by a mark command as done. */
-    private static void markTask(String command, Task[] tasks, int taskCount) throws ShaiException {
-        int index = parseTaskIndex(command, "mark", taskCount);
+    private static void markTask(String command, List<Task> tasks) throws ShaiException {
+        int index = parseTaskIndex(command, "mark", tasks);
         System.out.println("\tNice! I've marked this task as done:");
-        Task task = tasks[index];
+        Task task = tasks.get(index);
         task.markAsDone();
         System.out.println("\t  " + task);
     }
 
     /** Marks the task selected by an unmark command as not done. */
-    private static void unmarkTask(String command, Task[] tasks, int taskCount) throws ShaiException {
-        int index = parseTaskIndex(command, "unmark", taskCount);
+    private static void unmarkTask(String command, List<Task> tasks) throws ShaiException {
+        int index = parseTaskIndex(command, "unmark", tasks);
         System.out.println("\tOK, I've marked this task as not done yet:");
-        Task task = tasks[index];
+        Task task = tasks.get(index);
         task.unmark();
         System.out.println("\t  " + task);
     }
 
-    /** Adds a ToDo parsed from a command and returns the updated task count. */
-    private static int addToDo(String command, Task[] tasks, int taskCount) throws ShaiException {
-        String description = command.substring("todo".length()).trim();
-        requireNonEmpty(description, "Hold up - I need a description for that todo.");
-        return addTask(new ToDo(description), tasks, taskCount);
+    /** Deletes the task selected by a delete command and reports the updated task count. */
+    private static void deleteTask(String command, List<Task> tasks) throws ShaiException {
+        int index = parseTaskIndex(command, "delete", tasks);
+        System.out.println("\tNoted. I've removed this task:");
+        System.out.println("\t  " + tasks.get(index));
+        tasks.remove(index);
+        System.out.println("\tNow you have " + tasks.size() + " tasks in the list.");
     }
 
-    /** Adds a Deadline parsed from a command and returns the updated task count. */
-    private static int addDeadline(String command, Task[] tasks, int taskCount) throws ShaiException {
+    /** Adds a ToDo parsed from a command. */
+    private static void addToDo(String command, List<Task> tasks) throws ShaiException {
+        String description = command.substring("todo".length()).trim();
+        requireNonEmpty(description, "Hold up - I need a description for that todo.");
+        addTask(new ToDo(description), tasks);
+    }
+
+    /** Adds a Deadline parsed from a command. */
+    private static void addDeadline(String command, List<Task> tasks) throws ShaiException {
         int indexBy = command.indexOf("/by");
         if (indexBy < 0) {
             throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by Friday.");
@@ -107,11 +119,11 @@ public class Shai {
         String by = command.substring(indexBy + 3).trim();
         requireNonEmpty(description, "Hold up - I need a description for that deadline.");
         requireNonEmpty(by, "Hold up - I need a date after /by.");
-        return addTask(new Deadline(description, by), tasks, taskCount);
+        addTask(new Deadline(description, by), tasks);
     }
 
-    /** Adds an Event parsed from a command and returns the updated task count. */
-    private static int addEvent(String command, Task[] tasks, int taskCount) throws ShaiException {
+    /** Adds an Event parsed from a command. */
+    private static void addEvent(String command, List<Task> tasks) throws ShaiException {
         int indexFrom = command.indexOf("/from");
         int indexTo = command.indexOf("/to");
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
@@ -123,7 +135,7 @@ public class Shai {
         requireNonEmpty(description, "Hold up - I need a description for that event.");
         requireNonEmpty(from, "Hold up - I need a starting time after /from.");
         requireNonEmpty(to, "Hold up - I need an ending time after /to.");
-        return addTask(new Event(description, from, to), tasks, taskCount);
+        addTask(new Event(description, from, to), tasks);
     }
 
     /** Returns whether the input is a command or a command followed by arguments. */
@@ -138,8 +150,8 @@ public class Shai {
         }
     }
 
-    /** Parses and validates a one-based task number, returning its zero-based array index. */
-    private static int parseTaskIndex(String command, String commandName, int taskCount)
+    /** Parses and validates a one-based task number, returning its zero-based list index. */
+    private static int parseTaskIndex(String command, String commandName, List<Task> tasks)
             throws ShaiException {
         String argument = command.substring(commandName.length()).trim();
         requireNonEmpty(argument, "Please provide a task number after " + commandName + ".");
@@ -151,18 +163,17 @@ public class Shai {
             throw new ShaiException("The task number after " + commandName + " must be a whole number.");
         }
 
-        if (oneBasedIndex < 1 || oneBasedIndex > taskCount) {
+        if (oneBasedIndex < 1 || oneBasedIndex > tasks.size()) {
             throw new ShaiException("That task number is not in your list yet.");
         }
         return oneBasedIndex - 1;
     }
 
     /** Stores a task and prints the common confirmation message. */
-    private static int addTask(Task task, Task[] tasks, int taskCount) {
+    private static void addTask(Task task, List<Task> tasks) {
         System.out.println("\tGot it. I've added this task:");
-        tasks[taskCount++] = task;
+        tasks.add(task);
         System.out.println("\t  " + task);
-        System.out.println("\tNow you have " + taskCount + " tasks in the list.");
-        return taskCount;
+        System.out.println("\tNow you have " + tasks.size() + " tasks in the list.");
     }
 }
