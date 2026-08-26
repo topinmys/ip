@@ -219,3 +219,96 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
   ```
+
+## Test Case 6: Reject an empty ToDo description
+
+- Aim: Verify that Shai reports an error for a `todo` command without a description and continues accepting commands.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Hold up - I need a description for that todo.
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 7: Reject malformed commands
+
+- Aim: Verify that Shai reports specific errors for malformed deadlines and events, unknown commands, and invalid task numbers.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  deadline submit report
+  deadline /by Friday
+  event team sync /from 2pm
+  event /from 2pm /to 4pm
+  blah
+  mark abc
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	A deadline needs a date after /by. Try: deadline submit report /by Friday.
+	____________________________________________________________
+
+	____________________________________________________________
+	Hold up - I need a description for that deadline.
+	____________________________________________________________
+
+	____________________________________________________________
+	An event needs /from and /to times. Try: event meeting /from 2pm /to 4pm.
+	____________________________________________________________
+
+	____________________________________________________________
+	Hold up - I need a description for that event.
+	____________________________________________________________
+
+	____________________________________________________________
+	Ayy, I don't know that command yet.
+	____________________________________________________________
+
+	____________________________________________________________
+	The task number after mark must be a whole number.
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
