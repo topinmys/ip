@@ -52,14 +52,14 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
   ```
 
-## Test Case 2: Add and list a task
+## Test Case 2: Add and list a ToDo
 
-- Aim: Verify that a normal command is added as an incomplete task and appears in the task list.
+- Aim: Verify that a `todo` command adds an incomplete ToDo and that it appears in the task list.
 - Command: `java -cp _temp\test-ui\classes Shai`
 - Inputs:
 
   ```text
-  buy milk
+  todo buy milk
   list
   bye
   ```
@@ -74,17 +74,19 @@ This plan describes black-box tests for the `Shai` command-line interface.
   	  ___) | | | | (_| | |
   	 |____/|_| |_|\__,_|_|
   	Yo, what's good. I'm Shai.
-  	Drop the word, I gotchu.
-  	____________________________________________________________
+	Drop the word, I gotchu.
+	____________________________________________________________
 
-  	____________________________________________________________
-  	added: buy milk
-  	____________________________________________________________
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] buy milk
+	Now you have 1 tasks in the list.
+	____________________________________________________________
 
-  	____________________________________________________________
-  	Here are the tasks in your list:
-  	1.[ ] buy milk
-  	____________________________________________________________
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][ ] buy milk
+	____________________________________________________________
 
   	____________________________________________________________
   	Say less. Stay blessed, peace!
@@ -92,14 +94,14 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
   ```
 
-## Test Case 3: Mark and unmark a task
+## Test Case 3: Mark and unmark a ToDo
 
-- Aim: Verify that `mark 1` changes the first task to done and `unmark 1` changes it back to not done.
+- Aim: Verify that `mark 1` changes a ToDo to done and `unmark 1` changes it back to not done.
 - Command: `java -cp _temp\test-ui\classes Shai`
 - Inputs:
 
   ```text
-  submit report
+  todo submit report
   mark 1
   unmark 1
   list
@@ -116,30 +118,104 @@ This plan describes black-box tests for the `Shai` command-line interface.
   	  ___) | | | | (_| | |
   	 |____/|_| |_|\__,_|_|
   	Yo, what's good. I'm Shai.
-  	Drop the word, I gotchu.
-  	____________________________________________________________
+	Drop the word, I gotchu.
+	____________________________________________________________
 
-  	____________________________________________________________
-  	added: submit report
-  	____________________________________________________________
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] submit report
+	Now you have 1 tasks in the list.
+	____________________________________________________________
 
   	____________________________________________________________
   	Nice! I've marked this task as done:
-  	  [X] submit report
+	  [T][X] submit report
   	____________________________________________________________
 
   	____________________________________________________________
   	OK, I've marked this task as not done yet:
-  	  [ ] submit report
+	  [T][ ] submit report
   	____________________________________________________________
 
   	____________________________________________________________
   	Here are the tasks in your list:
-  	1.[ ] submit report
+	1.[T][ ] submit report
   	____________________________________________________________
 
   	____________________________________________________________
   	Say less. Stay blessed, peace!
-  	____________________________________________________________
+	____________________________________________________________
+
+  ```
+
+## Test Case 4: Add a Deadline
+
+- Aim: Verify that a `deadline` command stores and displays its description and `by` value.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  deadline return book /by Sunday
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] return book (by: Sunday)
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 5: Add an Event
+
+- Aim: Verify that an `event` command stores and displays its description, `from` value, and `to` value.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  event project meeting /from Mon 2pm /to 4pm
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
 
   ```
