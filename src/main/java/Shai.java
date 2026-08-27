@@ -14,7 +14,13 @@ public class Shai {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        List<Task> tasks = new ArrayList<>();
+        List<Task> tasks;
+        try {
+            tasks = Storage.loadTasks();
+        } catch (ShaiException e) {
+            System.out.println("\t" + e.getMessage());
+            tasks = new ArrayList<>();
+        }
 
         printBanner();
 

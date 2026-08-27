@@ -21,6 +21,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 - Output comparison: exact, after normalizing CRLF/LF line endings only.
 - Isolation: run every test case in a fresh process.
+- Filesystem isolation: remove `data/shai.txt` before each case except Test Case 13, which intentionally uses the file produced by Test Case 12.
 - Failure policy: stop immediately at the first failed test case.
 
 ## Test Case 1: Exit immediately
@@ -585,7 +586,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 ## Test Case 12: Save the current task list after mutations
 
-- Aim: Verify that adding different task types and changing task status produces the expected current task list for persistence.
+- Aim: Verify that adding different task types and changing task status writes the expected current task list to disk.
 - Command: `java -cp _temp\test-ui\classes Shai`
 - Inputs:
 
@@ -632,6 +633,44 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 	Nice! I've marked this task as done:
 	  [T][X] buy milk
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][X] buy milk
+	2.[D][ ] return book (by: Friday)
+	3.[E][ ] project meeting (from: 2pm to: 4pm)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+
+## Test Case 13: Load the task list on startup
+
+- Aim: Verify that a new Shai process loads the tasks saved by Test Case 12 before accepting commands.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
 	____________________________________________________________
 
 	____________________________________________________________
