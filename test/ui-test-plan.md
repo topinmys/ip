@@ -582,3 +582,67 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
   ```
+
+## Test Case 12: Save the current task list after mutations
+
+- Aim: Verify that adding different task types and changing task status produces the expected current task list for persistence.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo buy milk
+  deadline return book /by Friday
+  event project meeting /from 2pm /to 4pm
+  mark 1
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] buy milk
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] return book (by: Friday)
+	Now you have 2 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [E][ ] project meeting (from: 2pm to: 4pm)
+	Now you have 3 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Nice! I've marked this task as done:
+	  [T][X] buy milk
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][X] buy milk
+	2.[D][ ] return book (by: Friday)
+	3.[E][ ] project meeting (from: 2pm to: 4pm)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
