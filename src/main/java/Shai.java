@@ -14,7 +14,13 @@ public class Shai {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
-        List<Task> tasks = new ArrayList<>();
+        List<Task> tasks;
+        try {
+            tasks = Storage.loadTasks();
+        } catch (ShaiException e) {
+            System.out.println("\t" + e.getMessage());
+            tasks = new ArrayList<>();
+        }
 
         printBanner();
 
@@ -82,6 +88,7 @@ public class Shai {
         Task task = tasks.get(index);
         task.markAsDone();
         System.out.println("\t  " + task);
+        Storage.saveTasks(tasks);
     }
 
     /** Marks the task selected by an unmark command as not done. */
@@ -91,6 +98,7 @@ public class Shai {
         Task task = tasks.get(index);
         task.unmark();
         System.out.println("\t  " + task);
+        Storage.saveTasks(tasks);
     }
 
     /** Deletes the task selected by a delete command and reports the updated task count. */
@@ -100,6 +108,7 @@ public class Shai {
         System.out.println("\t  " + tasks.get(index));
         tasks.remove(index);
         System.out.println("\tNow you have " + tasks.size() + " tasks in the list.");
+        Storage.saveTasks(tasks);
     }
 
     /** Adds a ToDo parsed from a command. */
@@ -170,10 +179,11 @@ public class Shai {
     }
 
     /** Stores a task and prints the common confirmation message. */
-    private static void addTask(Task task, List<Task> tasks) {
+    private static void addTask(Task task, List<Task> tasks) throws ShaiException {
         System.out.println("\tGot it. I've added this task:");
         tasks.add(task);
         System.out.println("\t  " + task);
         System.out.println("\tNow you have " + tasks.size() + " tasks in the list.");
+        Storage.saveTasks(tasks);
     }
 }
