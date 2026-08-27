@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 
 /**
  * A simple command-line chatbot that echoes commands until the user says goodbye.
@@ -122,12 +124,13 @@ public class Shai {
     private static void addDeadline(String command, List<Task> tasks) throws ShaiException {
         int indexBy = command.indexOf("/by");
         if (indexBy < 0) {
-            throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by Friday.");
+            throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.");
         }
         String description = command.substring("deadline".length(), indexBy).trim();
-        String by = command.substring(indexBy + 3).trim();
+        String byText = command.substring(indexBy + 3).trim();
         requireNonEmpty(description, "Hold up - I need a description for that deadline.");
-        requireNonEmpty(by, "Hold up - I need a date after /by.");
+        requireNonEmpty(byText, "Hold up - I need a date after /by.");
+        LocalDateTime by = parseDateTime(byText);
         addTask(new Deadline(description, by), tasks);
     }
 
@@ -136,15 +139,26 @@ public class Shai {
         int indexFrom = command.indexOf("/from");
         int indexTo = command.indexOf("/to");
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
-            throw new ShaiException("An event needs /from and /to times. Try: event meeting /from 2pm /to 4pm.");
+            throw new ShaiException("An event needs /from and /to times. Try: event meeting /from 2019-12-01 1400 /to 2019-12-01 1600.");
         }
         String description = command.substring("event".length(), indexFrom).trim();
-        String from = command.substring(indexFrom + 5, indexTo).trim();
-        String to = command.substring(indexTo + 3).trim();
+        String fromText = command.substring(indexFrom + 5, indexTo).trim();
+        String toText = command.substring(indexTo + 3).trim();
         requireNonEmpty(description, "Hold up - I need a description for that event.");
-        requireNonEmpty(from, "Hold up - I need a starting time after /from.");
-        requireNonEmpty(to, "Hold up - I need an ending time after /to.");
+        requireNonEmpty(fromText, "Hold up - I need a starting time after /from.");
+        requireNonEmpty(toText, "Hold up - I need an ending time after /to.");
+        LocalDateTime from = parseDateTime(fromText);
+        LocalDateTime to = parseDateTime(toText);
         addTask(new Event(description, from, to), tasks);
+    }
+
+    /** Parses a task date and converts parser errors into a user-friendly command error. */
+    private static LocalDateTime parseDateTime(String value) throws ShaiException {
+        try {
+            return DateTimeParser.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new ShaiException("Invalid date/time. Use yyyy-MM-dd HHmm, for example 2019-12-02 1800.");
+        }
     }
 
     /** Returns whether the input is a command or a command followed by arguments. */

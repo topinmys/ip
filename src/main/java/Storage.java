@@ -1,4 +1,6 @@
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -95,11 +97,12 @@ public class Storage {
         String status = task.isDone() ? "1" : "0";
         if (task instanceof Deadline deadline) {
             return "D | " + status + " | " + escapeField(task.getDescription())
-                    + " | " + escapeField(deadline.getBy());
+                    + " | " + escapeField(DateTimeParser.formatForStorage(deadline.getBy()));
         }
         if (task instanceof Event event) {
             return "E | " + status + " | " + escapeField(task.getDescription())
-                    + " | " + escapeField(event.getFrom()) + " | " + escapeField(event.getTo());
+                    + " | " + escapeField(DateTimeParser.formatForStorage(event.getFrom()))
+                    + " | " + escapeField(DateTimeParser.formatForStorage(event.getTo()));
         }
         return "T | " + status + " | " + escapeField(task.getDescription());
     }
@@ -141,13 +144,14 @@ public class Storage {
                 if (fields.size() != 4 || fields.get(3).isBlank()) {
                     throw invalidData(lineNumber);
                 }
-                task = new Deadline(description, fields.get(3));
+                task = new Deadline(description, parseDateTime(fields.get(3), lineNumber));
                 break;
             case "E":
                 if (fields.size() != 5 || fields.get(3).isBlank() || fields.get(4).isBlank()) {
                     throw invalidData(lineNumber);
                 }
-                task = new Event(description, fields.get(3), fields.get(4));
+                task = new Event(description, parseDateTime(fields.get(3), lineNumber),
+                        parseDateTime(fields.get(4), lineNumber));
                 break;
             default:
                 throw invalidData(lineNumber);
@@ -157,6 +161,15 @@ public class Storage {
             task.markAsDone();
         }
         return task;
+    }
+
+    /** Parses a date or time restored from the task file. */
+    private static LocalDateTime parseDateTime(String value, int lineNumber) throws ShaiException {
+        try {
+            return DateTimeParser.parse(value);
+        } catch (DateTimeParseException e) {
+            throw invalidData(lineNumber);
+        }
     }
 
     /** Splits a persisted line while preserving escaped separators and special characters. */

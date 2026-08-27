@@ -156,7 +156,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 - Inputs:
 
   ```text
-  deadline return book /by Sunday
+  deadline return book /by 2019-12-01
   bye
   ```
 
@@ -175,7 +175,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [D][ ] return book (by: Sunday)
+	  [D][ ] return book (by: Dec 01 2019)
 	Now you have 1 tasks in the list.
 	____________________________________________________________
 
@@ -192,7 +192,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 - Inputs:
 
   ```text
-  event project meeting /from Mon 2pm /to 4pm
+  event project meeting /from 2019-10-15 1400 /to 2019-10-15 1600
   bye
   ```
 
@@ -211,7 +211,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+	  [E][ ] project meeting (from: Oct 15 2019, 2:00 PM to: Oct 15 2019, 4:00 PM)
 	Now you have 1 tasks in the list.
 	____________________________________________________________
 
@@ -257,15 +257,16 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 ## Test Case 7: Reject malformed commands
 
-- Aim: Verify that Shai reports specific errors for malformed deadlines and events, unknown commands, and invalid task numbers.
+- Aim: Verify that Shai reports specific errors for malformed deadlines and events, invalid dates, unknown commands, and invalid task numbers.
 - Command: `java -cp _temp\test-ui\classes Shai`
 - Inputs:
 
   ```text
   deadline submit report
-  deadline /by Friday
-  event team sync /from 2pm
-  event /from 2pm /to 4pm
+  deadline /by 2019-12-01
+  deadline impossible date /by 2019-02-30
+  event team sync /from 2019-12-01 1400
+  event /from 2019-12-01 1400 /to 2019-12-01 1600
   blah
   mark abc
   bye
@@ -285,7 +286,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	A deadline needs a date after /by. Try: deadline submit report /by Friday.
+	A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -293,7 +294,11 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	An event needs /from and /to times. Try: event meeting /from 2pm /to 4pm.
+	Invalid date/time. Use yyyy-MM-dd HHmm, for example 2019-12-02 1800.
+	____________________________________________________________
+
+	____________________________________________________________
+	An event needs /from and /to times. Try: event meeting /from 2019-12-01 1400 /to 2019-12-01 1600.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -444,10 +449,10 @@ This plan describes black-box tests for the `Shai` command-line interface.
   ```text
   todo alpha
   todo
-  deadline beta /by Friday
+  deadline beta /by 2019-12-01
   deadline report /by
-  event planning /from 2pm /to 3pm
-  event review /from /to 4pm
+  event planning /from 2019-12-01 1400 /to 2019-12-01 1500
+  event review /from /to 2019-12-01 1600
   list
   bye
   ```
@@ -477,7 +482,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [D][ ] beta (by: Friday)
+	  [D][ ] beta (by: Dec 01 2019)
 	Now you have 2 tasks in the list.
 	____________________________________________________________
 
@@ -487,7 +492,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [E][ ] planning (from: 2pm to: 3pm)
+	  [E][ ] planning (from: Dec 01 2019, 2:00 PM to: Dec 01 2019, 3:00 PM)
 	Now you have 3 tasks in the list.
 	____________________________________________________________
 
@@ -498,8 +503,8 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 	Here are the tasks in your list:
 	1.[T][ ] alpha
-	2.[D][ ] beta (by: Friday)
-	3.[E][ ] planning (from: 2pm to: 3pm)
+	2.[D][ ] beta (by: Dec 01 2019)
+	3.[E][ ] planning (from: Dec 01 2019, 2:00 PM to: Dec 01 2019, 3:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
@@ -592,8 +597,8 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
   ```text
   todo buy milk
-  deadline return book /by Friday
-  event project meeting /from 2pm /to 4pm
+  deadline return book /by 2/12/2019 1800
+  event project meeting /from 2019-12-03 1400 /to 2019-12-03 1600
   mark 1
   list
   bye
@@ -620,13 +625,13 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [D][ ] return book (by: Friday)
+	  [D][ ] return book (by: Dec 02 2019, 6:00 PM)
 	Now you have 2 tasks in the list.
 	____________________________________________________________
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [E][ ] project meeting (from: 2pm to: 4pm)
+	  [E][ ] project meeting (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
 	Now you have 3 tasks in the list.
 	____________________________________________________________
 
@@ -638,8 +643,8 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 	Here are the tasks in your list:
 	1.[T][X] buy milk
-	2.[D][ ] return book (by: Friday)
-	3.[E][ ] project meeting (from: 2pm to: 4pm)
+	2.[D][ ] return book (by: Dec 02 2019, 6:00 PM)
+	3.[E][ ] project meeting (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
@@ -676,8 +681,8 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 	Here are the tasks in your list:
 	1.[T][X] buy milk
-	2.[D][ ] return book (by: Friday)
-	3.[E][ ] project meeting (from: 2pm to: 4pm)
+	2.[D][ ] return book (by: Dec 02 2019, 6:00 PM)
+	3.[E][ ] project meeting (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
@@ -689,14 +694,14 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 ## Test Case 14: Save task content containing separators
 
-- Aim: Verify that task descriptions and date or time fields containing pipes and backslashes are saved without corrupting the file format.
+- Aim: Verify that task descriptions containing pipes and backslashes are saved without corrupting the file format.
 - Command: `java -cp _temp\test-ui\classes Shai`
 - Inputs:
 
   ```text
   todo review | draft \ backup \
-  deadline submit | final /by Friday | 5pm
-  event meeting | sync /from 2pm | room /to 4pm
+  deadline submit | final /by 2019-12-04 1700
+  event meeting | sync /from 2019-12-04 1400 /to 2019-12-04 1600
   list
   bye
   ```
@@ -722,21 +727,21 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [D][ ] submit | final (by: Friday | 5pm)
+	  [D][ ] submit | final (by: Dec 04 2019, 5:00 PM)
 	Now you have 2 tasks in the list.
 	____________________________________________________________
 
 	____________________________________________________________
 	Got it. I've added this task:
-	  [E][ ] meeting | sync (from: 2pm | room to: 4pm)
+	  [E][ ] meeting | sync (from: Dec 04 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
 	Now you have 3 tasks in the list.
 	____________________________________________________________
 
 	____________________________________________________________
 	Here are the tasks in your list:
 	1.[T][ ] review | draft \ backup \
-	2.[D][ ] submit | final (by: Friday | 5pm)
-	3.[E][ ] meeting | sync (from: 2pm | room to: 4pm)
+	2.[D][ ] submit | final (by: Dec 04 2019, 5:00 PM)
+	3.[E][ ] meeting | sync (from: Dec 04 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
@@ -772,8 +777,8 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 	Here are the tasks in your list:
 	1.[T][ ] review | draft \ backup \
-	2.[D][ ] submit | final (by: Friday | 5pm)
-	3.[E][ ] meeting | sync (from: 2pm | room to: 4pm)
+	2.[D][ ] submit | final (by: Dec 04 2019, 5:00 PM)
+	3.[E][ ] meeting | sync (from: Dec 04 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
