@@ -1,10 +1,11 @@
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Saves and loads the current task list on the hard disk.
@@ -22,13 +23,21 @@ public class Storage {
      * @throws ShaiException if the directory or file cannot be written
      */
     public static void saveTasks(List<Task> tasks) throws ShaiException {
+        if (tasks == null) {
+            throw new ShaiException("I couldn't save your tasks to disk.");
+        }
+
+        Path temporaryFile = TASK_FILE.resolveSibling(TASK_FILE.getFileName() + ".tmp");
         try {
             Files.createDirectories(TASK_FILE.getParent());
-            List<String> lines = tasks.stream()
-                    .map(Storage::formatTask)
-                    .collect(Collectors.toList());
-            Files.write(TASK_FILE, lines, StandardCharsets.UTF_8);
-        } catch (IOException e) {
+            List<String> lines = new ArrayList<>();
+            for (Task task : tasks) {
+                lines.add(formatTask(task));
+            }
+            Files.write(temporaryFile, lines, StandardCharsets.UTF_8);
+            replaceTaskFile(temporaryFile);
+        } catch (IOException | SecurityException | IllegalArgumentException e) {
+            deleteTemporaryFile(temporaryFile);
             throw new ShaiException("I couldn't save your tasks to disk.");
         }
     }
@@ -40,77 +49,157 @@ public class Storage {
      * @throws ShaiException if the file cannot be read or contains invalid data
      */
     public static List<Task> loadTasks() throws ShaiException {
-        if (!Files.exists(TASK_FILE)) {
-            return new ArrayList<>();
-        }
-
         try {
+            if (!Files.exists(TASK_FILE)) {
+                return new ArrayList<>();
+            }
+
             List<Task> tasks = new ArrayList<>();
-            for (String line : Files.readAllLines(TASK_FILE, StandardCharsets.UTF_8)) {
+            List<String> lines = Files.readAllLines(TASK_FILE, StandardCharsets.UTF_8);
+            for (int i = 0; i < lines.size(); i++) {
+                String line = lines.get(i);
                 if (!line.isBlank()) {
-                    tasks.add(parseTask(line));
+                    tasks.add(parseTask(line, i + 1));
                 }
             }
             return tasks;
-        } catch (IOException e) {
+        } catch (IOException | SecurityException e) {
             throw new ShaiException("I couldn't load your tasks from disk.");
+        }
+    }
+
+    /** Replaces the old task file only after the new contents have been written successfully. */
+    private static void replaceTaskFile(Path temporaryFile) throws IOException {
+        try {
+            Files.move(temporaryFile, TASK_FILE,
+                    StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (AtomicMoveNotSupportedException e) {
+            Files.move(temporaryFile, TASK_FILE, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    /** Removes a failed temporary save without hiding the original save error. */
+    private static void deleteTemporaryFile(Path temporaryFile) {
+        try {
+            Files.deleteIfExists(temporaryFile);
+        } catch (IOException | SecurityException ignored) {
+            // The original save error is the useful message for the user.
         }
     }
 
     /** Converts a task into the simple line format used by the data file. */
     private static String formatTask(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("A task list cannot contain null tasks.");
+        }
         String status = task.isDone() ? "1" : "0";
         if (task instanceof Deadline deadline) {
-            return "D | " + status + " | " + task.getDescription() + " | " + deadline.getBy();
+            return "D | " + status + " | " + escapeField(task.getDescription())
+                    + " | " + escapeField(deadline.getBy());
         }
         if (task instanceof Event event) {
-            return "E | " + status + " | " + task.getDescription()
-                    + " | " + event.getFrom() + " | " + event.getTo();
+            return "E | " + status + " | " + escapeField(task.getDescription())
+                    + " | " + escapeField(event.getFrom()) + " | " + escapeField(event.getTo());
         }
-        return "T | " + status + " | " + task.getDescription();
+        return "T | " + status + " | " + escapeField(task.getDescription());
+    }
+
+    /** Escapes characters that have a special meaning in the task file format. */
+    private static String escapeField(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("Task fields cannot be null.");
+        }
+        return value.replace("\\", "\\\\")
+                .replace("|", "\\|")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r");
     }
 
     /** Parses one persisted task line. */
-    private static Task parseTask(String line) throws ShaiException {
-        String[] fields = line.split("\\s*\\|\\s*", -1);
-        if (fields.length < 3) {
-            throw new ShaiException("I couldn't load your tasks from disk.");
+    private static Task parseTask(String line, int lineNumber) throws ShaiException {
+        List<String> fields = splitFields(line, lineNumber);
+        if (fields.size() < 3) {
+            throw invalidData(lineNumber);
         }
 
-        String type = fields[0];
-        String status = fields[1];
-        String description = fields[2];
+        String type = fields.get(0);
+        String status = fields.get(1);
+        String description = fields.get(2);
         if (description.isBlank() || !(status.equals("0") || status.equals("1"))) {
-            throw new ShaiException("I couldn't load your tasks from disk.");
+            throw invalidData(lineNumber);
         }
 
         Task task;
         switch (type) {
             case "T":
-                if (fields.length != 3) {
-                    throw new ShaiException("I couldn't load your tasks from disk.");
+                if (fields.size() != 3) {
+                    throw invalidData(lineNumber);
                 }
                 task = new ToDo(description);
                 break;
             case "D":
-                if (fields.length != 4 || fields[3].isBlank()) {
-                    throw new ShaiException("I couldn't load your tasks from disk.");
+                if (fields.size() != 4 || fields.get(3).isBlank()) {
+                    throw invalidData(lineNumber);
                 }
-                task = new Deadline(description, fields[3]);
+                task = new Deadline(description, fields.get(3));
                 break;
             case "E":
-                if (fields.length != 5 || fields[3].isBlank() || fields[4].isBlank()) {
-                    throw new ShaiException("I couldn't load your tasks from disk.");
+                if (fields.size() != 5 || fields.get(3).isBlank() || fields.get(4).isBlank()) {
+                    throw invalidData(lineNumber);
                 }
-                task = new Event(description, fields[3], fields[4]);
+                task = new Event(description, fields.get(3), fields.get(4));
                 break;
             default:
-                throw new ShaiException("I couldn't load your tasks from disk.");
+                throw invalidData(lineNumber);
         }
 
         if (status.equals("1")) {
             task.markAsDone();
         }
         return task;
+    }
+
+    /** Splits a persisted line while preserving escaped separators and special characters. */
+    private static List<String> splitFields(String line, int lineNumber) throws ShaiException {
+        List<String> fields = new ArrayList<>();
+        StringBuilder field = new StringBuilder();
+        for (int i = 0; i < line.length(); i++) {
+            char character = line.charAt(i);
+            if (character == '|') {
+                fields.add(field.toString().trim());
+                field.setLength(0);
+            } else if (character == '\\' && i + 1 < line.length()) {
+                char escaped = line.charAt(i + 1);
+                if (escaped == '\\' || escaped == '|' || escaped == 'n' || escaped == 'r') {
+                    field.append(unescapeCharacter(escaped));
+                    i++;
+                } else {
+                    field.append(character);
+                }
+            } else if (character == '\\') {
+                throw invalidData(lineNumber);
+            } else {
+                field.append(character);
+            }
+        }
+        fields.add(field.toString().trim());
+        return fields;
+    }
+
+    /** Converts one escaped character into its stored value. */
+    private static char unescapeCharacter(char escaped) {
+        switch (escaped) {
+            case 'n':
+                return '\n';
+            case 'r':
+                return '\r';
+            default:
+                return escaped;
+        }
+    }
+
+    /** Creates a consistent error for a malformed persisted line. */
+    private static ShaiException invalidData(int lineNumber) {
+        return new ShaiException("I couldn't load your tasks from disk (line " + lineNumber + ").");
     }
 }

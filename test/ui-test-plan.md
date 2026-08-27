@@ -21,7 +21,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 - Output comparison: exact, after normalizing CRLF/LF line endings only.
 - Isolation: run every test case in a fresh process.
-- Filesystem isolation: remove `data/shai.txt` before each case except Test Case 13, which intentionally uses the file produced by Test Case 12.
+- Filesystem isolation: remove `data/shai.txt` before each case except Test Cases 13 and 15, which intentionally reuse the files produced by Test Cases 12 and 14 respectively. Test Case 16 creates its own malformed-file fixture.
 - Failure policy: stop immediately at the first failed test case.
 
 ## Test Case 1: Exit immediately
@@ -678,6 +678,137 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	1.[T][X] buy milk
 	2.[D][ ] return book (by: Friday)
 	3.[E][ ] project meeting (from: 2pm to: 4pm)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+
+## Test Case 14: Save task content containing separators
+
+- Aim: Verify that task descriptions and date or time fields containing pipes and backslashes are saved without corrupting the file format.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  todo review | draft \ backup \
+  deadline submit | final /by Friday | 5pm
+  event meeting | sync /from 2pm | room /to 4pm
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] review | draft \ backup \
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] submit | final (by: Friday | 5pm)
+	Now you have 2 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [E][ ] meeting | sync (from: 2pm | room to: 4pm)
+	Now you have 3 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][ ] review | draft \ backup \
+	2.[D][ ] submit | final (by: Friday | 5pm)
+	3.[E][ ] meeting | sync (from: 2pm | room to: 4pm)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 15: Load task content containing separators
+
+- Aim: Verify that a new Shai process restores task fields containing pipes and backslashes saved by Test Case 14.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[T][ ] review | draft \ backup \
+	2.[D][ ] submit | final (by: Friday | 5pm)
+	3.[E][ ] meeting | sync (from: 2pm | room to: 4pm)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 16: Recover from malformed task data
+
+- Aim: Verify that malformed persisted data reports an error and Shai continues with an empty task list instead of crashing.
+- Command: `java -cp _temp\test-ui\classes Shai`
+- Inputs:
+
+  ```text
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	I couldn't load your tasks from disk (line 1).
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
 	____________________________________________________________
 
 	____________________________________________________________
