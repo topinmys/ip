@@ -1,4 +1,3 @@
-import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -68,7 +67,7 @@ public class Ui {
     }
 
     /** Prints every task currently stored in the task list. */
-    public void showTasks(List<Task> tasks) {
+    public void showTasks(TaskList tasks) {
         System.out.println("\tHere are the tasks in your list:");
         for (int i = 1; i <= tasks.size(); i++) {
             System.out.println("\t" + i + "." + tasks.get(i - 1));

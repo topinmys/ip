@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -14,12 +12,12 @@ public class Shai {
      */
     public static void main(String[] args) {
         Ui ui = new Ui();
-        List<Task> tasks;
+        TaskList tasks;
         try {
-            tasks = Storage.loadTasks();
+            tasks = new TaskList(Storage.loadTasks());
         } catch (ShaiException e) {
             ui.showLoadingError(e);
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
 
         ui.showBanner();
@@ -57,41 +55,41 @@ public class Shai {
     }
 
     /** Marks the task selected by a mark command as done. */
-    private static void markTask(String command, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void markTask(String command, TaskList tasks, Ui ui) throws ShaiException {
         int index = parseTaskIndex(command, "mark", tasks);
         Task task = tasks.get(index);
         task.markAsDone();
         ui.showMarked(task);
-        Storage.saveTasks(tasks);
+        Storage.saveTasks(tasks.toList());
     }
 
     /** Marks the task selected by an unmark command as not done. */
-    private static void unmarkTask(String command, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void unmarkTask(String command, TaskList tasks, Ui ui) throws ShaiException {
         int index = parseTaskIndex(command, "unmark", tasks);
         Task task = tasks.get(index);
         task.unmark();
         ui.showUnmarked(task);
-        Storage.saveTasks(tasks);
+        Storage.saveTasks(tasks.toList());
     }
 
     /** Deletes the task selected by a delete command and reports the updated task count. */
-    private static void deleteTask(String command, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void deleteTask(String command, TaskList tasks, Ui ui) throws ShaiException {
         int index = parseTaskIndex(command, "delete", tasks);
         Task task = tasks.get(index);
         tasks.remove(index);
         ui.showDeleted(task, tasks.size());
-        Storage.saveTasks(tasks);
+        Storage.saveTasks(tasks.toList());
     }
 
     /** Adds a ToDo parsed from a command. */
-    private static void addToDo(String command, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void addToDo(String command, TaskList tasks, Ui ui) throws ShaiException {
         String description = command.substring("todo".length()).trim();
         requireNonEmpty(description, "Hold up - I need a description for that todo.");
         addTask(new ToDo(description), tasks, ui);
     }
 
     /** Adds a Deadline parsed from a command. */
-    private static void addDeadline(String command, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void addDeadline(String command, TaskList tasks, Ui ui) throws ShaiException {
         int indexBy = command.indexOf("/by");
         if (indexBy < 0) {
             throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.");
@@ -105,7 +103,7 @@ public class Shai {
     }
 
     /** Adds an Event parsed from a command. */
-    private static void addEvent(String command, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void addEvent(String command, TaskList tasks, Ui ui) throws ShaiException {
         int indexFrom = command.indexOf("/from");
         int indexTo = command.indexOf("/to");
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
@@ -144,7 +142,7 @@ public class Shai {
     }
 
     /** Parses and validates a one-based task number, returning its zero-based list index. */
-    private static int parseTaskIndex(String command, String commandName, List<Task> tasks)
+    private static int parseTaskIndex(String command, String commandName, TaskList tasks)
             throws ShaiException {
         String argument = command.substring(commandName.length()).trim();
         requireNonEmpty(argument, "Please provide a task number after " + commandName + ".");
@@ -163,9 +161,9 @@ public class Shai {
     }
 
     /** Stores a task and prints the common confirmation message. */
-    private static void addTask(Task task, List<Task> tasks, Ui ui) throws ShaiException {
+    private static void addTask(Task task, TaskList tasks, Ui ui) throws ShaiException {
         tasks.add(task);
         ui.showAdded(task, tasks.size());
-        Storage.saveTasks(tasks);
+        Storage.saveTasks(tasks.toList());
     }
 }
