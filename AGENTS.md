@@ -28,6 +28,20 @@ Unless the user says otherwise, assume that you are assisting a student working 
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
 
+## Java switch statement style
+
+Use arrow-form switch statements or switch expressions when appropriate:
+
+```java
+switch (condition) {
+    case ABC -> method("1");
+    case DEF -> method("2");
+    default -> method("0");
+}
+```
+
+Indent `case` and `default` one level inside the `switch`, and indent their statements one additional level. For traditional colon-form switches, include `break;` at the end of every case, including `default`, whenever the case can reach it. If a case intentionally falls through without a break, add an explicit `// Fallthrough` comment before the next case.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.

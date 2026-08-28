@@ -16,7 +16,16 @@ import java.util.List;
  * always reflects the current in-memory list.</p>
  */
 public class Storage {
-    private static final Path TASK_FILE = Path.of("data", "shai.txt");
+    private final Path taskFile;
+
+    /**
+     * Creates storage backed by the specified file.
+     *
+     * @param filePath path to the task file
+     */
+    public Storage(String filePath) {
+        taskFile = Path.of(filePath);
+    }
 
     /**
      * Saves all tasks to the configured task file.
@@ -24,14 +33,16 @@ public class Storage {
      * @param tasks the current task list
      * @throws ShaiException if the directory or file cannot be written
      */
-    public static void saveTasks(List<Task> tasks) throws ShaiException {
+    public void saveTasks(TaskList tasks) throws ShaiException {
         if (tasks == null) {
             throw new ShaiException("I couldn't save your tasks to disk.");
         }
 
-        Path temporaryFile = TASK_FILE.resolveSibling(TASK_FILE.getFileName() + ".tmp");
+        Path temporaryFile = taskFile.resolveSibling(taskFile.getFileName() + ".tmp");
         try {
-            Files.createDirectories(TASK_FILE.getParent());
+            if (taskFile.getParent() != null) {
+                Files.createDirectories(taskFile.getParent());
+            }
             List<String> lines = new ArrayList<>();
             for (Task task : tasks) {
                 lines.add(formatTask(task));
@@ -50,14 +61,14 @@ public class Storage {
      * @return the tasks stored on disk, or an empty list if the file does not exist
      * @throws ShaiException if the file cannot be read or contains invalid data
      */
-    public static List<Task> loadTasks() throws ShaiException {
+    public TaskList loadTasks() throws ShaiException {
         try {
-            if (!Files.exists(TASK_FILE)) {
-                return new ArrayList<>();
+            if (!Files.exists(taskFile)) {
+                return new TaskList();
             }
 
-            List<Task> tasks = new ArrayList<>();
-            List<String> lines = Files.readAllLines(TASK_FILE, StandardCharsets.UTF_8);
+            TaskList tasks = new TaskList();
+            List<String> lines = Files.readAllLines(taskFile, StandardCharsets.UTF_8);
             for (int i = 0; i < lines.size(); i++) {
                 String line = lines.get(i);
                 if (!line.isBlank()) {
@@ -71,12 +82,12 @@ public class Storage {
     }
 
     /** Replaces the old task file only after the new contents have been written successfully. */
-    private static void replaceTaskFile(Path temporaryFile) throws IOException {
+    private void replaceTaskFile(Path temporaryFile) throws IOException {
         try {
-            Files.move(temporaryFile, TASK_FILE,
+            Files.move(temporaryFile, taskFile,
                     StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException e) {
-            Files.move(temporaryFile, TASK_FILE, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporaryFile, taskFile, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
