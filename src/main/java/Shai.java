@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -8,120 +7,91 @@ import java.time.format.DateTimeParseException;
  * A simple command-line chatbot that echoes commands until the user says goodbye.
  */
 public class Shai {
-    private static final String LINE = "\t____________________________________________________________";
-
     /**
      * Starts Shai, displays the greeting, and processes commands from standard input.
      *
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        Ui ui = new Ui();
         List<Task> tasks;
         try {
             tasks = Storage.loadTasks();
         } catch (ShaiException e) {
-            System.out.println("\t" + e.getMessage());
+            ui.showLoadingError(e);
             tasks = new ArrayList<>();
         }
 
-        printBanner();
+        ui.showBanner();
 
-        Scanner scanner = new Scanner(System.in);
-        while (scanner.hasNextLine()) {
-            String command = scanner.nextLine().trim();
-            System.out.println(LINE);
+        while (ui.hasNextCommand()) {
+            String command = ui.readCommand();
+            ui.showCommandStart();
             try {
                 if (command.equals("bye")) {
-                    System.out.println("\tSay less. Stay blessed, peace!");
+                    ui.showGoodbye();
                     break;
                 } else if (command.equals("list")) {
-                    listTasks(tasks);
+                    ui.showTasks(tasks);
                 } else if (isCommand(command, "mark")) {
-                    markTask(command, tasks);
+                    markTask(command, tasks, ui);
                 } else if (isCommand(command, "unmark")) {
-                    unmarkTask(command, tasks);
+                    unmarkTask(command, tasks, ui);
                 } else if (isCommand(command, "todo")) {
-                    addToDo(command, tasks);
+                    addToDo(command, tasks, ui);
                 } else if (isCommand(command, "deadline")) {
-                    addDeadline(command, tasks);
+                    addDeadline(command, tasks, ui);
                 } else if (isCommand(command, "event")) {
-                    addEvent(command, tasks);
+                    addEvent(command, tasks, ui);
                 } else if (isCommand(command, "delete")) {
-                    deleteTask(command, tasks);
+                    deleteTask(command, tasks, ui);
                 } else {
                     throw new ShaiException("Ayy, I don't know that command yet.");
                 }
             } catch (ShaiException e) {
-                System.out.println("\t" + e.getMessage());
+                ui.showError(e);
             } finally {
-                System.out.println(LINE + "\n");
+                ui.showCommandEnd();
             }
         }
     }
 
-    /** Prints the greeting shown when Shai starts. */
-    private static void printBanner() {
-        String banner = LINE + "\n"
-                + "\t  ____  _           _\n"
-                + "\t / ___|| |__   __ _(_)\n"
-                + "\t \\___ \\| '_ \\ / _` | |\n"
-                + "\t  ___) | | | | (_| | |\n"
-                + "\t |____/|_| |_|\\__,_|_|\n"
-                + "\tYo, what's good. I'm Shai.\n"
-                + "\tDrop the word, I gotchu.\n"
-                + LINE
-                + "\n";
-
-        System.out.println(banner);
-    }
-
-    /** Prints every task currently stored in the task list. */
-    private static void listTasks(List<Task> tasks) {
-        System.out.println("\tHere are the tasks in your list:");
-        for (int i = 1; i <= tasks.size(); i++) {
-            System.out.println("\t" + i + "." + tasks.get(i - 1));
-        }
-    }
-
     /** Marks the task selected by a mark command as done. */
-    private static void markTask(String command, List<Task> tasks) throws ShaiException {
+    private static void markTask(String command, List<Task> tasks, Ui ui) throws ShaiException {
         int index = parseTaskIndex(command, "mark", tasks);
-        System.out.println("\tNice! I've marked this task as done:");
         Task task = tasks.get(index);
         task.markAsDone();
-        System.out.println("\t  " + task);
+        ui.showMarked(task);
         Storage.saveTasks(tasks);
     }
 
     /** Marks the task selected by an unmark command as not done. */
-    private static void unmarkTask(String command, List<Task> tasks) throws ShaiException {
+    private static void unmarkTask(String command, List<Task> tasks, Ui ui) throws ShaiException {
         int index = parseTaskIndex(command, "unmark", tasks);
-        System.out.println("\tOK, I've marked this task as not done yet:");
         Task task = tasks.get(index);
         task.unmark();
-        System.out.println("\t  " + task);
+        ui.showUnmarked(task);
         Storage.saveTasks(tasks);
     }
 
     /** Deletes the task selected by a delete command and reports the updated task count. */
-    private static void deleteTask(String command, List<Task> tasks) throws ShaiException {
+    private static void deleteTask(String command, List<Task> tasks, Ui ui) throws ShaiException {
         int index = parseTaskIndex(command, "delete", tasks);
-        System.out.println("\tNoted. I've removed this task:");
-        System.out.println("\t  " + tasks.get(index));
+        Task task = tasks.get(index);
         tasks.remove(index);
-        System.out.println("\tNow you have " + tasks.size() + " tasks in the list.");
+        ui.showDeleted(task, tasks.size());
         Storage.saveTasks(tasks);
     }
 
     /** Adds a ToDo parsed from a command. */
-    private static void addToDo(String command, List<Task> tasks) throws ShaiException {
+    private static void addToDo(String command, List<Task> tasks, Ui ui) throws ShaiException {
         String description = command.substring("todo".length()).trim();
         requireNonEmpty(description, "Hold up - I need a description for that todo.");
-        addTask(new ToDo(description), tasks);
+        addTask(new ToDo(description), tasks, ui);
     }
 
     /** Adds a Deadline parsed from a command. */
-    private static void addDeadline(String command, List<Task> tasks) throws ShaiException {
+    private static void addDeadline(String command, List<Task> tasks, Ui ui) throws ShaiException {
         int indexBy = command.indexOf("/by");
         if (indexBy < 0) {
             throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.");
@@ -131,11 +101,11 @@ public class Shai {
         requireNonEmpty(description, "Hold up - I need a description for that deadline.");
         requireNonEmpty(byText, "Hold up - I need a date after /by.");
         LocalDateTime by = parseDateTime(byText);
-        addTask(new Deadline(description, by), tasks);
+        addTask(new Deadline(description, by), tasks, ui);
     }
 
     /** Adds an Event parsed from a command. */
-    private static void addEvent(String command, List<Task> tasks) throws ShaiException {
+    private static void addEvent(String command, List<Task> tasks, Ui ui) throws ShaiException {
         int indexFrom = command.indexOf("/from");
         int indexTo = command.indexOf("/to");
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
@@ -149,7 +119,7 @@ public class Shai {
         requireNonEmpty(toText, "Hold up - I need an ending time after /to.");
         LocalDateTime from = parseDateTime(fromText);
         LocalDateTime to = parseDateTime(toText);
-        addTask(new Event(description, from, to), tasks);
+        addTask(new Event(description, from, to), tasks, ui);
     }
 
     /** Parses a task date and converts parser errors into a user-friendly command error. */
@@ -193,11 +163,9 @@ public class Shai {
     }
 
     /** Stores a task and prints the common confirmation message. */
-    private static void addTask(Task task, List<Task> tasks) throws ShaiException {
-        System.out.println("\tGot it. I've added this task:");
+    private static void addTask(Task task, List<Task> tasks, Ui ui) throws ShaiException {
         tasks.add(task);
-        System.out.println("\t  " + task);
-        System.out.println("\tNow you have " + tasks.size() + " tasks in the list.");
+        ui.showAdded(task, tasks.size());
         Storage.saveTasks(tasks);
     }
 }
