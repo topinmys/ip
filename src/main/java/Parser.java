@@ -2,58 +2,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
 /**
- * Converts raw user input into validated commands for Shai to execute.
+ * Converts raw user input into executable commands for Shai.
  *
  * <p>Parsing and validation errors are reported as {@link ShaiException}s so
  * that the caller can display them without knowing the parsing details.</p>
  */
 public class Parser {
-    /** The command types understood by Shai. */
-    public enum CommandType {
-        BYE, LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE
-    }
-
-    /** Holds the structured data extracted from one valid user command. */
-    public static final class ParsedCommand {
-        private final CommandType type;
-        private final String description;
-        private final LocalDateTime firstDate;
-        private final LocalDateTime secondDate;
-        private final int taskIndex;
-
-        private ParsedCommand(CommandType type, String description,
-                LocalDateTime firstDate, LocalDateTime secondDate, int taskIndex) {
-            this.type = type;
-            this.description = description;
-            this.firstDate = firstDate;
-            this.secondDate = secondDate;
-            this.taskIndex = taskIndex;
-        }
-
-        /** Returns the type of this command. */
-        public CommandType getType() {
-            return type;
-        }
-
-        /** Returns the task description, when this command has one. */
-        public String getDescription() {
-            return description;
-        }
-
-        /** Returns the first date or time, when this command has one. */
-        public LocalDateTime getFirstDate() {
-            return firstDate;
-        }
-
-        /** Returns the second date or time, when this command has one. */
-        public LocalDateTime getSecondDate() {
-            return secondDate;
-        }
-
-        /** Returns the zero-based task index, when this command targets a task. */
-        public int getTaskIndex() {
-            return taskIndex;
-        }
+    /** The command types understood by the temporary parsed-command adapter. */
+    private enum CommandType {
+        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE
     }
 
     /**
@@ -61,15 +18,15 @@ public class Parser {
      *
      * @param input raw user input
      * @param taskCount current number of tasks, used to validate task numbers
-     * @return the structured command
+     * @return an executable command
      * @throws ShaiException if the command is unknown or malformed
      */
-    public ParsedCommand parse(String input, int taskCount) throws ShaiException {
+    public Command parse(String input, int taskCount) throws ShaiException {
         String command = input.trim();
         if (command.equals("bye")) {
-            return command(CommandType.BYE);
+            return new ExitCommand();
         } else if (command.equals("list")) {
-            return command(CommandType.LIST);
+            return new ParsedCommand(CommandType.LIST, null, null, null, -1);
         } else if (isCommand(command, "mark")) {
             return taskCommand(command, "mark", CommandType.MARK, taskCount);
         } else if (isCommand(command, "unmark")) {
@@ -86,27 +43,86 @@ public class Parser {
         throw new ShaiException("Ayy, I don't know that command yet.");
     }
 
-    /** Creates a command that does not require additional data. */
-    private static ParsedCommand command(CommandType type) {
-        return new ParsedCommand(type, null, null, null, -1);
+    /** Represents parsed commands that have not yet been split into concrete classes. */
+    private static final class ParsedCommand extends Command {
+        private final CommandType type;
+        private final String description;
+        private final LocalDateTime firstDate;
+        private final LocalDateTime secondDate;
+        private final int taskIndex;
+
+        private ParsedCommand(CommandType type, String description,
+                LocalDateTime firstDate, LocalDateTime secondDate, int taskIndex) {
+            this.type = type;
+            this.description = description;
+            this.firstDate = firstDate;
+            this.secondDate = secondDate;
+            this.taskIndex = taskIndex;
+        }
+
+        /** Executes the parsed command using the existing task operations. */
+        @Override
+        public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
+            switch (type) {
+            case LIST -> ui.showTasks(tasks);
+            case MARK -> markTask(tasks, ui, storage);
+            case UNMARK -> unmarkTask(tasks, ui, storage);
+            case TODO -> addTask(new ToDo(description), tasks, ui, storage);
+            case DEADLINE -> addTask(new Deadline(description, firstDate), tasks, ui, storage);
+            case EVENT -> addTask(new Event(description, firstDate, secondDate), tasks, ui, storage);
+            case DELETE -> deleteTask(tasks, ui, storage);
+            default -> throw new ShaiException("Ayy, I don't know that command yet.");
+            }
+        }
+
+        /** Marks the selected task as done and persists the list. */
+        private void markTask(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
+            Task task = tasks.get(taskIndex);
+            task.markAsDone();
+            ui.showMarked(task);
+            storage.saveTasks(tasks);
+        }
+
+        /** Marks the selected task as not done and persists the list. */
+        private void unmarkTask(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
+            Task task = tasks.get(taskIndex);
+            task.unmark();
+            ui.showUnmarked(task);
+            storage.saveTasks(tasks);
+        }
+
+        /** Deletes the selected task and persists the list. */
+        private void deleteTask(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
+            Task task = tasks.remove(taskIndex);
+            ui.showDeleted(task, tasks.size());
+            storage.saveTasks(tasks);
+        }
+
+        /** Adds a task, reports the updated count, and persists the list. */
+        private void addTask(Task task, TaskList tasks, Ui ui, Storage storage)
+                throws ShaiException {
+            tasks.add(task);
+            ui.showAdded(task, tasks.size());
+            storage.saveTasks(tasks);
+        }
     }
 
-    /** Parses a command that refers to one task by number. */
-    private static ParsedCommand taskCommand(String input, String commandName,
+    /** Creates a parsed command that refers to one task by number. */
+    private static Command taskCommand(String input, String commandName,
             CommandType type, int taskCount) throws ShaiException {
         return new ParsedCommand(type, null, null, null,
                 parseTaskIndex(input, commandName, taskCount));
     }
 
     /** Parses a ToDo command and extracts its description. */
-    private static ParsedCommand parseToDo(String command) throws ShaiException {
+    private static Command parseToDo(String command) throws ShaiException {
         String description = command.substring("todo".length()).trim();
         requireNonEmpty(description, "Hold up - I need a description for that todo.");
         return new ParsedCommand(CommandType.TODO, description, null, null, -1);
     }
 
     /** Parses a Deadline command and extracts its description and due date. */
-    private static ParsedCommand parseDeadline(String command) throws ShaiException {
+    private static Command parseDeadline(String command) throws ShaiException {
         int indexBy = command.indexOf("/by");
         if (indexBy < 0) {
             throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.");
@@ -119,7 +135,7 @@ public class Parser {
     }
 
     /** Parses an Event command and extracts its description and time range. */
-    private static ParsedCommand parseEvent(String command) throws ShaiException {
+    private static Command parseEvent(String command) throws ShaiException {
         int indexFrom = command.indexOf("/from");
         int indexTo = command.indexOf("/to");
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
