@@ -8,11 +8,6 @@ import java.time.format.DateTimeParseException;
  * that the caller can display them without knowing the parsing details.</p>
  */
 public class Parser {
-    /** The command types understood by the temporary parsed-command adapter. */
-    private enum CommandType {
-        TODO, DEADLINE, EVENT
-    }
-
     /**
      * Parses and validates a raw command.
      *
@@ -43,48 +38,11 @@ public class Parser {
         throw new ShaiException("Ayy, I don't know that command yet.");
     }
 
-    /** Represents parsed commands that have not yet been split into concrete classes. */
-    private static final class ParsedCommand extends Command {
-        private final CommandType type;
-        private final String description;
-        private final LocalDateTime firstDate;
-        private final LocalDateTime secondDate;
-        private final int taskIndex;
-
-        private ParsedCommand(CommandType type, String description,
-                LocalDateTime firstDate, LocalDateTime secondDate, int taskIndex) {
-            this.type = type;
-            this.description = description;
-            this.firstDate = firstDate;
-            this.secondDate = secondDate;
-            this.taskIndex = taskIndex;
-        }
-
-        /** Executes the parsed command using the existing task operations. */
-        @Override
-        public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
-            switch (type) {
-                case TODO -> addTask(new ToDo(description), tasks, ui, storage);
-                case DEADLINE -> addTask(new Deadline(description, firstDate), tasks, ui, storage);
-                case EVENT -> addTask(new Event(description, firstDate, secondDate), tasks, ui, storage);
-                default -> throw new ShaiException("Ayy, I don't know that command yet.");
-            }
-        }
-
-        /** Adds a task, reports the updated count, and persists the list. */
-        private void addTask(Task task, TaskList tasks, Ui ui, Storage storage)
-                throws ShaiException {
-            tasks.add(task);
-            ui.showAdded(task, tasks.size());
-            storage.saveTasks(tasks);
-        }
-    }
-
     /** Parses a ToDo command and extracts its description. */
     private static Command parseToDo(String command) throws ShaiException {
         String description = command.substring("todo".length()).trim();
         requireNonEmpty(description, "Hold up - I need a description for that todo.");
-        return new ParsedCommand(CommandType.TODO, description, null, null, -1);
+        return new AddCommand(new ToDo(description));
     }
 
     /** Parses a Deadline command and extracts its description and due date. */
@@ -97,7 +55,7 @@ public class Parser {
         String byText = command.substring(indexBy + 3).trim();
         requireNonEmpty(description, "Hold up - I need a description for that deadline.");
         requireNonEmpty(byText, "Hold up - I need a date after /by.");
-        return new ParsedCommand(CommandType.DEADLINE, description, parseDateTime(byText), null, -1);
+        return new AddCommand(new Deadline(description, parseDateTime(byText)));
     }
 
     /** Parses an Event command and extracts its description and time range. */
@@ -113,8 +71,7 @@ public class Parser {
         requireNonEmpty(description, "Hold up - I need a description for that event.");
         requireNonEmpty(fromText, "Hold up - I need a starting time after /from.");
         requireNonEmpty(toText, "Hold up - I need an ending time after /to.");
-        return new ParsedCommand(CommandType.EVENT, description,
-                parseDateTime(fromText), parseDateTime(toText), -1);
+        return new AddCommand(new Event(description, parseDateTime(fromText), parseDateTime(toText)));
     }
 
     /** Parses a task date and converts parser errors into a user-friendly command error. */
