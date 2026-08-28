@@ -10,7 +10,7 @@ import java.time.format.DateTimeParseException;
 public class Parser {
     /** The command types understood by the temporary parsed-command adapter. */
     private enum CommandType {
-        LIST, MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE
+        MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE
     }
 
     /**
@@ -26,7 +26,7 @@ public class Parser {
         if (command.equals("bye")) {
             return new ExitCommand();
         } else if (command.equals("list")) {
-            return new ParsedCommand(CommandType.LIST, null, null, null, -1);
+            return new ListCommand();
         } else if (isCommand(command, "mark")) {
             return taskCommand(command, "mark", CommandType.MARK, taskCount);
         } else if (isCommand(command, "unmark")) {
@@ -64,7 +64,6 @@ public class Parser {
         @Override
         public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
             switch (type) {
-                case LIST -> ui.showTasks(tasks);
                 case MARK -> markTask(tasks, ui, storage);
                 case UNMARK -> unmarkTask(tasks, ui, storage);
                 case TODO -> addTask(new ToDo(description), tasks, ui, storage);
