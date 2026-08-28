@@ -10,7 +10,7 @@ import java.time.format.DateTimeParseException;
 public class Parser {
     /** The command types understood by the temporary parsed-command adapter. */
     private enum CommandType {
-        MARK, UNMARK, TODO, DEADLINE, EVENT
+        TODO, DEADLINE, EVENT
     }
 
     /**
@@ -28,9 +28,9 @@ public class Parser {
         } else if (command.equals("list")) {
             return new ListCommand();
         } else if (isCommand(command, "mark")) {
-            return taskCommand(command, "mark", CommandType.MARK, taskCount);
+            return new MarkCommand(parseTaskIndex(command, "mark", taskCount));
         } else if (isCommand(command, "unmark")) {
-            return taskCommand(command, "unmark", CommandType.UNMARK, taskCount);
+            return new UnmarkCommand(parseTaskIndex(command, "unmark", taskCount));
         } else if (isCommand(command, "todo")) {
             return parseToDo(command);
         } else if (isCommand(command, "deadline")) {
@@ -64,29 +64,11 @@ public class Parser {
         @Override
         public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
             switch (type) {
-                case MARK -> markTask(tasks, ui, storage);
-                case UNMARK -> unmarkTask(tasks, ui, storage);
                 case TODO -> addTask(new ToDo(description), tasks, ui, storage);
                 case DEADLINE -> addTask(new Deadline(description, firstDate), tasks, ui, storage);
                 case EVENT -> addTask(new Event(description, firstDate, secondDate), tasks, ui, storage);
                 default -> throw new ShaiException("Ayy, I don't know that command yet.");
             }
-        }
-
-        /** Marks the selected task as done and persists the list. */
-        private void markTask(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
-            Task task = tasks.get(taskIndex);
-            task.markAsDone();
-            ui.showMarked(task);
-            storage.saveTasks(tasks);
-        }
-
-        /** Marks the selected task as not done and persists the list. */
-        private void unmarkTask(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
-            Task task = tasks.get(taskIndex);
-            task.unmark();
-            ui.showUnmarked(task);
-            storage.saveTasks(tasks);
         }
 
         /** Adds a task, reports the updated count, and persists the list. */
@@ -96,13 +78,6 @@ public class Parser {
             ui.showAdded(task, tasks.size());
             storage.saveTasks(tasks);
         }
-    }
-
-    /** Creates a parsed command that refers to one task by number. */
-    private static Command taskCommand(String input, String commandName,
-            CommandType type, int taskCount) throws ShaiException {
-        int taskIndex = parseTaskIndex(input, commandName, taskCount);
-        return new ParsedCommand(type, null, null, null, taskIndex);
     }
 
     /** Parses a ToDo command and extracts its description. */
