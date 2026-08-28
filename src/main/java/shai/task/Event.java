@@ -1,4 +1,7 @@
+package shai.task;
+
 import java.time.LocalDateTime;
+import shai.parser.DateTimeParser;
 
 /**
  * Represents a task that takes place between a start and end date or time.

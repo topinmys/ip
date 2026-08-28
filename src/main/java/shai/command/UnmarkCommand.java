@@ -1,3 +1,11 @@
+package shai.command;
+
+import shai.exception.ShaiException;
+import shai.storage.Storage;
+import shai.task.Task;
+import shai.task.TaskList;
+import shai.ui.Ui;
+
 /**
  * A command that marks one task as not done.
  */
