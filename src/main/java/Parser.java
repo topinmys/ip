@@ -64,14 +64,14 @@ public class Parser {
         @Override
         public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
             switch (type) {
-            case LIST -> ui.showTasks(tasks);
-            case MARK -> markTask(tasks, ui, storage);
-            case UNMARK -> unmarkTask(tasks, ui, storage);
-            case TODO -> addTask(new ToDo(description), tasks, ui, storage);
-            case DEADLINE -> addTask(new Deadline(description, firstDate), tasks, ui, storage);
-            case EVENT -> addTask(new Event(description, firstDate, secondDate), tasks, ui, storage);
-            case DELETE -> deleteTask(tasks, ui, storage);
-            default -> throw new ShaiException("Ayy, I don't know that command yet.");
+                case LIST -> ui.showTasks(tasks);
+                case MARK -> markTask(tasks, ui, storage);
+                case UNMARK -> unmarkTask(tasks, ui, storage);
+                case TODO -> addTask(new ToDo(description), tasks, ui, storage);
+                case DEADLINE -> addTask(new Deadline(description, firstDate), tasks, ui, storage);
+                case EVENT -> addTask(new Event(description, firstDate, secondDate), tasks, ui, storage);
+                case DELETE -> deleteTask(tasks, ui, storage);
+                default -> throw new ShaiException("Ayy, I don't know that command yet.");
             }
         }
 
