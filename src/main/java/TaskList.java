@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -7,7 +9,7 @@ import java.util.List;
  * <p>This class provides the task-list operations used by command handling so
  * callers do not need to manage the underlying collection directly.</p>
  */
-public class TaskList {
+public class TaskList implements Iterable<Task> {
     private final List<Task> tasks;
 
     /** Creates an empty task list. */
@@ -45,11 +47,12 @@ public class TaskList {
     }
 
     /**
-     * Returns a copy of the tasks for persistence or other read-only uses.
+     * Returns a read-only iterator over the current tasks.
      *
-     * @return a copy of the current tasks
+     * @return an iterator that cannot modify this task list
      */
-    public List<Task> toList() {
-        return new ArrayList<>(tasks);
+    @Override
+    public Iterator<Task> iterator() {
+        return Collections.unmodifiableList(tasks).iterator();
     }
 }

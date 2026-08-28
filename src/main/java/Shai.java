@@ -10,9 +10,10 @@ public class Shai {
     public static void main(String[] args) {
         Ui ui = new Ui();
         Parser parser = new Parser();
+        Storage storage = new Storage("data/shai.txt");
         TaskList tasks;
         try {
-            tasks = new TaskList(Storage.loadTasks());
+            tasks = storage.loadTasks();
         } catch (ShaiException e) {
             ui.showLoadingError(e);
             tasks = new TaskList();
@@ -26,33 +27,33 @@ public class Shai {
             try {
                 Parser.ParsedCommand command = parser.parse(input, tasks.size());
                 switch (command.getType()) {
-                case BYE:
-                    ui.showGoodbye();
-                    return;
-                case LIST:
-                    ui.showTasks(tasks);
-                    break;
+                    case BYE:
+                        ui.showGoodbye();
+                        return;
+                    case LIST:
+                        ui.showTasks(tasks);
+                        break;
                 case MARK:
-                    markTask(command, tasks, ui);
-                    break;
+                    markTask(command, tasks, ui, storage);
+                        break;
                 case UNMARK:
-                    unmarkTask(command, tasks, ui);
-                    break;
+                    unmarkTask(command, tasks, ui, storage);
+                        break;
                 case TODO:
-                    addTask(new ToDo(command.getDescription()), tasks, ui);
-                    break;
+                    addTask(new ToDo(command.getDescription()), tasks, ui, storage);
+                        break;
                 case DEADLINE:
-                    addTask(new Deadline(command.getDescription(), command.getFirstDate()), tasks, ui);
-                    break;
+                    addTask(new Deadline(command.getDescription(), command.getFirstDate()), tasks, ui, storage);
+                        break;
                 case EVENT:
                     addTask(new Event(command.getDescription(), command.getFirstDate(),
-                            command.getSecondDate()), tasks, ui);
-                    break;
+                            command.getSecondDate()), tasks, ui, storage);
+                        break;
                 case DELETE:
-                    deleteTask(command, tasks, ui);
-                    break;
-                default:
-                    throw new ShaiException("Ayy, I don't know that command yet.");
+                    deleteTask(command, tasks, ui, storage);
+                        break;
+                    default:
+                        throw new ShaiException("Ayy, I don't know that command yet.");
                 }
             } catch (ShaiException e) {
                 ui.showError(e);
@@ -63,35 +64,39 @@ public class Shai {
     }
 
     /** Marks the selected task as done. */
-    private static void markTask(Parser.ParsedCommand command, TaskList tasks, Ui ui)
+    private static void markTask(Parser.ParsedCommand command, TaskList tasks, Ui ui,
+            Storage storage)
             throws ShaiException {
         Task task = tasks.get(command.getTaskIndex());
         task.markAsDone();
         ui.showMarked(task);
-        Storage.saveTasks(tasks.toList());
+        storage.saveTasks(tasks);
     }
 
     /** Marks the selected task as not done. */
-    private static void unmarkTask(Parser.ParsedCommand command, TaskList tasks, Ui ui)
+    private static void unmarkTask(Parser.ParsedCommand command, TaskList tasks, Ui ui,
+            Storage storage)
             throws ShaiException {
         Task task = tasks.get(command.getTaskIndex());
         task.unmark();
         ui.showUnmarked(task);
-        Storage.saveTasks(tasks.toList());
+        storage.saveTasks(tasks);
     }
 
     /** Deletes the selected task and reports the updated task count. */
-    private static void deleteTask(Parser.ParsedCommand command, TaskList tasks, Ui ui)
+    private static void deleteTask(Parser.ParsedCommand command, TaskList tasks, Ui ui,
+            Storage storage)
             throws ShaiException {
         Task task = tasks.remove(command.getTaskIndex());
         ui.showDeleted(task, tasks.size());
-        Storage.saveTasks(tasks.toList());
+        storage.saveTasks(tasks);
     }
 
     /** Adds a task, reports the updated task count, and persists the list. */
-    private static void addTask(Task task, TaskList tasks, Ui ui) throws ShaiException {
+    private static void addTask(Task task, TaskList tasks, Ui ui, Storage storage)
+            throws ShaiException {
         tasks.add(task);
         ui.showAdded(task, tasks.size());
-        Storage.saveTasks(tasks.toList());
+        storage.saveTasks(tasks);
     }
 }
