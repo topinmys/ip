@@ -1,3 +1,10 @@
+package shai.command;
+
+import shai.exception.ShaiException;
+import shai.storage.Storage;
+import shai.task.TaskList;
+import shai.ui.Ui;
+
 /**
  * Represents one command that can be executed by Shai.
  */

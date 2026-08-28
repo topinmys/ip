@@ -5,18 +5,19 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test-session setup
 
 - Java version: 25
-- Entry point: `src/main/java/Shai.java`
+- Entry point: `src/main/java/shai/Shai.java`
 - Compile command:
 
   ```powershell
   New-Item -ItemType Directory -Force _temp\test-ui\classes | Out-Null
-  javac -d _temp\test-ui\classes src\main\java\*.java
+  New-Item -ItemType Directory -Force _temp\test-ui\classes | Out-Null
+  javac -d _temp\test-ui\classes (Get-ChildItem -Recurse -Filter *.java src\main\java | ForEach-Object { $_.FullName })
   ```
 
 - Test command for each case:
 
   ```powershell
-  java -cp _temp\test-ui\classes Shai
+  java -cp _temp\test-ui\classes shai.Shai
   ```
 
 - Output comparison: exact, after normalizing CRLF/LF line endings only.
@@ -27,7 +28,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 1: Exit immediately
 
 - Aim: Verify that Shai displays its greeting and exits cleanly when the user enters `bye`.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -56,7 +57,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 2: Add and list a ToDo
 
 - Aim: Verify that a `todo` command adds an incomplete ToDo and that it appears in the task list.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -98,7 +99,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 3: Mark and unmark a ToDo
 
 - Aim: Verify that `mark 1` changes a ToDo to done and `unmark 1` changes it back to not done.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -152,7 +153,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 4: Add a Deadline
 
 - Aim: Verify that a `deadline` command stores and displays its description and `by` value.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -188,7 +189,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 5: Add an Event
 
 - Aim: Verify that an `event` command stores and displays its description, `from` value, and `to` value.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -224,7 +225,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 6: Reject an empty ToDo description
 
 - Aim: Verify that Shai reports an error for a `todo` command without a description and continues accepting commands.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -258,7 +259,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 7: Reject malformed commands
 
 - Aim: Verify that Shai reports specific errors for malformed deadlines and events, invalid dates, unknown commands, and invalid task numbers.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -322,7 +323,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 8: Delete a middle task
 
 - Aim: Verify that deleting a task removes the selected task and re-numbers the remaining tasks.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -386,7 +387,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 9: Reject invalid delete commands
 
 - Aim: Verify that delete reports errors for a missing number, a non-numeric number, and an out-of-range number without changing the list.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -443,7 +444,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 10: Valid additions survive invalid input
 
 - Aim: Verify that rejected ToDo, deadline, and event commands do not alter tasks added by valid commands.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -516,7 +517,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 11: Task actions preserve state after invalid indexes
 
 - Aim: Verify that an invalid mark or delete number does not change a task's status or remove it.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -592,7 +593,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 12: Save the current task list after mutations
 
 - Aim: Verify that adding different task types and changing task status writes the expected current task list to disk.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -657,7 +658,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 13: Load the task list on startup
 
 - Aim: Verify that a new Shai process loads the tasks saved by Test Case 12 before accepting commands.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -695,7 +696,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 14: Save task content containing separators
 
 - Aim: Verify that task descriptions containing pipes and backslashes are saved without corrupting the file format.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -753,7 +754,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 15: Load task content containing separators
 
 - Aim: Verify that a new Shai process restores task fields containing pipes and backslashes saved by Test Case 14.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
@@ -790,7 +791,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 ## Test Case 16: Recover from malformed task data
 
 - Aim: Verify that malformed persisted data reports an error and Shai continues with an empty task list instead of crashing.
-- Command: `java -cp _temp\test-ui\classes Shai`
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text

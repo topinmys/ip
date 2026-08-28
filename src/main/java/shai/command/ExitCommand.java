@@ -1,3 +1,9 @@
+package shai.command;
+
+import shai.storage.Storage;
+import shai.task.TaskList;
+import shai.ui.Ui;
+
 /**
  * A command that displays the goodbye message and ends the application.
  */

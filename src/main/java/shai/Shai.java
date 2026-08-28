@@ -1,3 +1,12 @@
+package shai;
+
+import shai.command.Command;
+import shai.exception.ShaiException;
+import shai.parser.Parser;
+import shai.storage.Storage;
+import shai.task.TaskList;
+import shai.ui.Ui;
+
 /**
  * A simple command-line chatbot that echoes commands until the user says goodbye.
  */
