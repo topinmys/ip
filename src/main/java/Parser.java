@@ -10,7 +10,7 @@ import java.time.format.DateTimeParseException;
 public class Parser {
     /** The command types understood by the temporary parsed-command adapter. */
     private enum CommandType {
-        MARK, UNMARK, TODO, DEADLINE, EVENT, DELETE
+        MARK, UNMARK, TODO, DEADLINE, EVENT
     }
 
     /**
@@ -38,7 +38,7 @@ public class Parser {
         } else if (isCommand(command, "event")) {
             return parseEvent(command);
         } else if (isCommand(command, "delete")) {
-            return taskCommand(command, "delete", CommandType.DELETE, taskCount);
+            return new DeleteCommand(parseTaskIndex(command, "delete", taskCount));
         }
         throw new ShaiException("Ayy, I don't know that command yet.");
     }
@@ -69,7 +69,6 @@ public class Parser {
                 case TODO -> addTask(new ToDo(description), tasks, ui, storage);
                 case DEADLINE -> addTask(new Deadline(description, firstDate), tasks, ui, storage);
                 case EVENT -> addTask(new Event(description, firstDate, secondDate), tasks, ui, storage);
-                case DELETE -> deleteTask(tasks, ui, storage);
                 default -> throw new ShaiException("Ayy, I don't know that command yet.");
             }
         }
@@ -90,13 +89,6 @@ public class Parser {
             storage.saveTasks(tasks);
         }
 
-        /** Deletes the selected task and persists the list. */
-        private void deleteTask(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
-            Task task = tasks.remove(taskIndex);
-            ui.showDeleted(task, tasks.size());
-            storage.saveTasks(tasks);
-        }
-
         /** Adds a task, reports the updated count, and persists the list. */
         private void addTask(Task task, TaskList tasks, Ui ui, Storage storage)
                 throws ShaiException {
@@ -109,8 +101,8 @@ public class Parser {
     /** Creates a parsed command that refers to one task by number. */
     private static Command taskCommand(String input, String commandName,
             CommandType type, int taskCount) throws ShaiException {
-        return new ParsedCommand(type, null, null, null,
-                parseTaskIndex(input, commandName, taskCount));
+        int taskIndex = parseTaskIndex(input, commandName, taskCount);
+        return new ParsedCommand(type, null, null, null, taskIndex);
     }
 
     /** Parses a ToDo command and extracts its description. */
