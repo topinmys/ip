@@ -79,6 +79,14 @@ public class Ui {
         }
     }
 
+    /** Prints every task whose description contains the requested keyword. */
+    public void showMatchingTasks(TaskList tasks) {
+        System.out.println("\tHere are the matching tasks in your list:");
+        for (int i = 1; i <= tasks.size(); i++) {
+            System.out.println("\t" + i + "." + tasks.get(i - 1));
+        }
+    }
+
     /** Prints the response for marking a task as done. */
     public void showMarked(Task task) {
         System.out.println("\tNice! I've marked this task as done:");

@@ -6,6 +6,7 @@ import shai.command.AddCommand;
 import shai.command.Command;
 import shai.command.DeleteCommand;
 import shai.command.ExitCommand;
+import shai.command.FindCommand;
 import shai.command.ListCommand;
 import shai.command.MarkCommand;
 import shai.command.UnmarkCommand;
@@ -35,6 +36,8 @@ public class Parser {
             return new ExitCommand();
         } else if (command.equals("list")) {
             return new ListCommand();
+        } else if (isCommand(command, "find")) {
+            return parseFind(command);
         } else if (isCommand(command, "mark")) {
             return new MarkCommand(parseTaskIndex(command, "mark", taskCount));
         } else if (isCommand(command, "unmark")) {
@@ -49,6 +52,13 @@ public class Parser {
             return new DeleteCommand(parseTaskIndex(command, "delete", taskCount));
         }
         throw new ShaiException("Ayy, I don't know that command yet.");
+    }
+
+    /** Parses a find command and extracts its keyword. */
+    private static Command parseFind(String command) throws ShaiException {
+        String keyword = command.substring("find".length()).trim();
+        requireNonEmpty(keyword, "Please provide a keyword after find.");
+        return new FindCommand(keyword);
     }
 
     /** Parses a ToDo command and extracts its description. */

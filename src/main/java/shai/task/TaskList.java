@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Owns the tasks currently managed by Shai.
@@ -46,6 +47,16 @@ public class TaskList implements Iterable<Task> {
     /** Returns the number of tasks in the list. */
     public int size() {
         return tasks.size();
+    }
+
+    /** Returns a new list containing tasks whose descriptions contain a keyword. */
+    public TaskList find(String keyword) {
+        String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+        List<Task> matchingTasks = tasks.stream()
+                .filter(task -> task.getDescription().toLowerCase(Locale.ROOT)
+                        .contains(normalizedKeyword))
+                .toList();
+        return new TaskList(matchingTasks);
     }
 
     /**
