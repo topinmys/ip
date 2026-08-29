@@ -48,6 +48,11 @@ Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
 
+## JUnit test coverage
+
+Aim to cover approximately the highest-value 50% of methods with JUnit tests, prioritizing complex, core, or business-critical logic over trivial wrappers.
+After every code change, review and update the relevant JUnit tests so that they continue to cover the highest-value methods and comply with this 50% target.
+
 ## UI testing after code updates
 
 After every code update, review `test/ui-test-plan.md` and update it when the change adds or changes observable command-line UI behavior. Then invoke the project-local `$test-ui` skill using the updated plan, even when no plan changes are needed. Treat the test session as part of the code update: report its console transcript and stop at the first failure. Do not claim the code update is complete without reporting the test result or any setup blocker.
