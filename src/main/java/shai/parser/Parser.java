@@ -76,7 +76,9 @@ public class Parser {
         int indexFrom = command.indexOf("/from");
         int indexTo = command.indexOf("/to");
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
-            throw new ShaiException("An event needs /from and /to times. Try: event meeting /from 2019-12-01 1400 /to 2019-12-01 1600.");
+            throw new ShaiException(
+                    "An event needs /from and /to times. Try: event meeting /from 2019-12-01 1400 "
+                            + "/to 2019-12-01 1600.");
         }
         String description = command.substring("event".length(), indexFrom).trim();
         String fromText = command.substring(indexFrom + 5, indexTo).trim();

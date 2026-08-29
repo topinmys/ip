@@ -42,11 +42,29 @@ switch (condition) {
 
 Indent `case` and `default` one level inside the `switch`, and indent their statements one additional level. For traditional colon-form switches, include `break;` at the end of every case, including `default`, whenever the case can reach it. If a case intentionally falls through without a break, add an explicit `// Fallthrough` comment before the next case.
 
+## SE-EDU Java coding standard
+
+All Java code in this project must follow the project-specific
+`seedu-java-coding-standard` skill, based on the
+[SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/intermediate.html).
+This includes naming, four-space indentation, K&R braces, the 120-character
+line limit, consistent explicit imports, braced control-flow bodies, and
+descriptive Javadoc comments. Apply the standard to production and test code
+while preserving behavior and avoiding unrelated formatting changes.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
+
+All future commits and branches in this project must follow the project-specific
+`seedu-git-standard` skill, based on the
+[SE-EDU Git conventions](https://se-education.org/guides/conventions/git.html).
+Commit subjects must be imperative, capitalized, period-free, and at most 72
+characters; non-trivial commits must include a WHAT/WHY body wrapped at 72
+characters. Use meaningful kebab-case branch names, including the issue-number
+format when applicable. Review the staged diff and do not stage unrelated files.
 
 ## JUnit test coverage
 
