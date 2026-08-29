@@ -58,6 +58,14 @@ Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
 
+All future commits and branches in this project must follow the project-specific
+`seedu-git-standard` skill, based on the
+[SE-EDU Git conventions](https://se-education.org/guides/conventions/git.html).
+Commit subjects must be imperative, capitalized, period-free, and at most 72
+characters; non-trivial commits must include a WHAT/WHY body wrapped at 72
+characters. Use meaningful kebab-case branch names, including the issue-number
+format when applicable. Review the staged diff and do not stage unrelated files.
+
 ## JUnit test coverage
 
 Aim to cover approximately the highest-value 50% of methods with JUnit tests, prioritizing complex, core, or business-critical logic over trivial wrappers.
