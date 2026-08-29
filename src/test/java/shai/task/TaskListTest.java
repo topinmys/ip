@@ -56,4 +56,26 @@ class TaskListTest {
         assertThrows(UnsupportedOperationException.class, iterator::remove);
         assertEquals(1, taskList.size());
     }
+
+    @Test
+    void find_keywordMatchesIgnoringCase_returnsMatchingTasksInOrder() {
+        TaskList taskList = new TaskList(List.of(
+                new ToDo("read book"),
+                new ToDo("buy milk"),
+                new ToDo("return BOOK")));
+
+        TaskList matchingTasks = taskList.find("book");
+
+        assertEquals(2, matchingTasks.size());
+        assertEquals("read book", matchingTasks.get(0).getDescription());
+        assertEquals("return BOOK", matchingTasks.get(1).getDescription());
+        assertEquals(3, taskList.size());
+    }
+
+    @Test
+    void find_noDescriptionMatches_returnsEmptyTaskList() {
+        TaskList taskList = new TaskList(List.of(new ToDo("buy milk")));
+
+        assertEquals(0, taskList.find("book").size());
+    }
 }

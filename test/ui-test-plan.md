@@ -822,3 +822,61 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
   ```
+
+## Test Case 17: Find tasks by keyword
+
+- Aim: Verify that `find` displays tasks whose descriptions contain the keyword,
+  matches without regard to case, and leaves non-matching tasks hidden.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  todo read book
+  deadline return book /by 2019-12-01
+  todo buy milk
+  find BOOK
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] read book
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] return book (by: Dec 01 2019)
+	Now you have 2 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] buy milk
+	Now you have 3 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the matching tasks in your list:
+	1.[T][ ] read book
+	2.[D][ ] return book (by: Dec 01 2019)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```

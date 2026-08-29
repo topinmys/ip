@@ -10,6 +10,7 @@ import shai.command.AddCommand;
 import shai.command.Command;
 import shai.command.DeleteCommand;
 import shai.command.ExitCommand;
+import shai.command.FindCommand;
 import shai.command.ListCommand;
 import shai.command.MarkCommand;
 import shai.command.UnmarkCommand;
@@ -38,6 +39,7 @@ class ParserTest {
 
         assertInstanceOf(ExitCommand.class, parser.parse("bye", 0));
         assertInstanceOf(ListCommand.class, parser.parse("list", 0));
+        assertInstanceOf(FindCommand.class, parser.parse("find book", 0));
         assertInstanceOf(MarkCommand.class, parser.parse("mark 1", 1));
         assertInstanceOf(UnmarkCommand.class, parser.parse("unmark 1", 1));
         assertInstanceOf(DeleteCommand.class, parser.parse("delete 1", 1));
@@ -94,6 +96,7 @@ class ParserTest {
         Parser parser = new Parser();
 
         assertParseError(parser, "blah", 0, "Ayy, I don't know that command yet.");
+        assertParseError(parser, "find", 0, "Please provide a keyword after find.");
         assertParseError(parser, "todo", 0, "Hold up - I need a description for that todo.");
         assertParseError(parser, "mark 2", 1, "That task number is not in your list yet.");
         assertParseError(parser, "deadline report /by 2019-02-30", 0,
