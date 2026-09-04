@@ -1,5 +1,10 @@
 package shai.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -12,11 +17,6 @@ import shai.task.Deadline;
 import shai.task.Event;
 import shai.task.TaskList;
 import shai.task.ToDo;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests persistence, escaping, restoration, and malformed-data handling. */
 class StorageTest {
@@ -62,16 +62,14 @@ class StorageTest {
         Path file = temporaryDirectory.resolve("tasks.txt");
         Files.writeString(file, "X | 0 | invalid task\n");
 
-        ShaiException exception = assertThrows(ShaiException.class,
-                () -> new Storage(file.toString()).loadTasks());
+        ShaiException exception = assertThrows(ShaiException.class, () -> new Storage(file.toString()).loadTasks());
 
         assertEquals("I couldn't load your tasks from disk (line 1).", exception.getMessage());
     }
 
     @Test
     void saveTasks_nullTaskList_throwsUsefulError() {
-        ShaiException exception = assertThrows(ShaiException.class,
-                () -> storage().saveTasks(null));
+        ShaiException exception = assertThrows(ShaiException.class, () -> storage().saveTasks(null));
 
         assertEquals("I couldn't save your tasks to disk.", exception.getMessage());
     }
