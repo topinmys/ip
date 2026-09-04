@@ -1,5 +1,11 @@
 package shai.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
@@ -21,12 +27,6 @@ import shai.task.Event;
 import shai.task.TaskList;
 import shai.task.ToDo;
 import shai.ui.Ui;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Tests command selection, argument extraction, and parser validation. */
 class ParserTest {
@@ -109,8 +109,7 @@ class ParserTest {
 
     private static void assertParseError(Parser parser, String input, int taskCount,
                                          String expectedMessage) {
-        ShaiException exception = assertThrows(ShaiException.class,
-                () -> parser.parse(input, taskCount));
+        ShaiException exception = assertThrows(ShaiException.class, () -> parser.parse(input, taskCount));
 
         assertEquals(expectedMessage, exception.getMessage());
     }

@@ -1,6 +1,7 @@
 package shai.ui;
 
 import java.util.Scanner;
+
 import shai.exception.ShaiException;
 import shai.task.Task;
 import shai.task.TaskList;
