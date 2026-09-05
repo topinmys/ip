@@ -5,6 +5,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import shai.Shai;
 /**
  * Controller for the main GUI.
  */
@@ -18,7 +19,7 @@ public class MainWindow extends AnchorPane {
     @FXML
     private Button sendButton;
 
-    private GuiShai shai;
+    private Shai shai;
 
     private Image userImage = new Image(this.getClass().getResourceAsStream("/images/gj.jpg"));
     private Image shaiImage = new Image(this.getClass().getResourceAsStream("/images/shai.jpg"));
@@ -29,7 +30,7 @@ public class MainWindow extends AnchorPane {
     }
 
     /** Injects the Shai instance */
-    public void setShai(GuiShai s) {
+    public void setShai(Shai s) {
         shai = s;
     }
 

@@ -5,13 +5,14 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import shai.Shai;
 
 /**
  * A GUI for Duke using FXML.
  */
 public class Main extends Application {
 
-    private GuiShai shai = new GuiShai();
+    private Shai shai = new Shai("data/shai.txt");
 
     @Override
     public void start(Stage stage) {
