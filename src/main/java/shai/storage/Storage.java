@@ -117,15 +117,26 @@ public class Storage {
         }
         String status = task.isDone() ? "1" : "0";
         if (task instanceof Deadline deadline) {
-            return "D | " + status + " | " + escapeField(task.getDescription())
-                    + " | " + escapeField(DateTimeParser.formatForStorage(deadline.getBy()));
+            return joinFields(
+                    "D",
+                    status,
+                    escapeField(task.getDescription()),
+                    escapeField(DateTimeParser.formatForStorage(deadline.getBy())));
         }
         if (task instanceof Event event) {
-            return "E | " + status + " | " + escapeField(task.getDescription())
-                    + " | " + escapeField(DateTimeParser.formatForStorage(event.getFrom()))
-                    + " | " + escapeField(DateTimeParser.formatForStorage(event.getTo()));
+            return joinFields(
+                    "E",
+                    status,
+                    escapeField(task.getDescription()),
+                    escapeField(DateTimeParser.formatForStorage(event.getFrom())),
+                    escapeField(DateTimeParser.formatForStorage(event.getTo())));
         }
-        return "T | " + status + " | " + escapeField(task.getDescription());
+        return joinFields("T", status, escapeField(task.getDescription()));
+    }
+
+    /** Joins a variable number of task fields using the storage separator. */
+    private static String joinFields(String... fields) {
+        return String.join(" | ", fields);
     }
 
     /** Escapes characters that have a special meaning in the task file format. */
