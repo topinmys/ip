@@ -10,7 +10,8 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
   ```powershell
   New-Item -ItemType Directory -Force _temp\test-ui\classes | Out-Null
-  javac -d _temp\test-ui\classes (Get-ChildItem -Recurse -Filter *.java src\main\java\shai | ForEach-Object { $_.FullName })
+  $cliSources = Get-ChildItem -Recurse -Filter *.java src\main\java\shai | Where-Object { $_.FullName -notlike '*\shai\gui\*' }
+  javac -d _temp\test-ui\classes ($cliSources | ForEach-Object { $_.FullName })
   ```
 
 - Test command for each case:

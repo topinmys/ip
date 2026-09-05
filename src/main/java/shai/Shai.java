@@ -88,6 +88,11 @@ public class Shai {
         return responseOutput.toString(StandardCharsets.UTF_8).replace("\t", "").strip();
     }
 
+    /** Returns the introductory message shown to non-console clients. */
+    public String getGreeting() {
+        return ui.getGreeting();
+    }
+
     /** Starts Shai with its default task-data file. */
     public static void main(String[] args) {
         new Shai("data/shai.txt").run();

@@ -13,6 +13,13 @@ class ShaiTest {
     Path temporaryDirectory;
 
     @Test
+    void getGreeting_returnsGuiFriendlyIntroduction() {
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
+
+        assertEquals("Yo, what's good. I'm Shai.\nDrop the word, I gotchu.", shai.getGreeting());
+    }
+
+    @Test
     void getResponse_addTodo_returnsResponseAndPersistsTask() {
         Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
 

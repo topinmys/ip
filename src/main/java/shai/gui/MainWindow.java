@@ -1,3 +1,5 @@
+package shai.gui;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -5,10 +7,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import shai.Shai;
-/**
- * Controller for the main GUI.
- */
+
+/** Controller for the main Shai GUI window. */
 public class MainWindow extends AnchorPane {
     @FXML
     private ScrollPane scrollPane;
@@ -29,14 +31,18 @@ public class MainWindow extends AnchorPane {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
     }
 
-    /** Injects the Shai instance */
+    /** Injects the Shai instance used to process GUI commands. */
     public void setShai(Shai s) {
         shai = s;
     }
 
+    /** Adds Shai's introductory message to the conversation. */
+    public void showGreeting() {
+        dialogContainer.getChildren().add(DialogBox.getShaiDialog(shai.getGreeting(), shaiImage));
+    }
+
     /**
-     * Creates two dialog boxes, one echoing user input and the other containing Shai's reply and then appends them to
-     * the dialog container. Clears the user input after processing.
+     * Displays the user's input and Shai's response, then clears the input field.
      */
     @FXML
     private void handleUserInput() {
@@ -47,5 +53,10 @@ public class MainWindow extends AnchorPane {
                 DialogBox.getShaiDialog(response, shaiImage)
         );
         userInput.clear();
+
+        if (input.trim().equals("bye")) {
+            Stage stage = (Stage) userInput.getScene().getWindow();
+            stage.close();
+        }
     }
 }

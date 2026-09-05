@@ -57,7 +57,7 @@ test {
 }
 
 application {
-    mainClass = 'shai.Shai'
+    mainClass = 'shai.gui.Launcher'
 }
 
 jar {

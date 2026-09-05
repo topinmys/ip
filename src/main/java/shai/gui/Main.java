@@ -1,3 +1,5 @@
+package shai.gui;
+
 import java.io.IOException;
 
 import javafx.application.Application;
@@ -7,11 +9,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import shai.Shai;
 
-/**
- * A GUI for Duke using FXML.
- */
+/** A JavaFX GUI for Shai using FXML. */
 public class Main extends Application {
-
     private Shai shai = new Shai("data/shai.txt");
 
     @Override
@@ -21,9 +20,11 @@ public class Main extends Application {
             AnchorPane ap = fxmlLoader.load();
             Scene scene = new Scene(ap);
             stage.setScene(scene);
-            fxmlLoader.<MainWindow>getController().setShai(shai); // inject the Shai instance
-            stage.setMinHeight(220);
-            stage.setMinWidth(417);
+            MainWindow mainWindow = fxmlLoader.getController();
+            mainWindow.setShai(shai);
+            mainWindow.showGreeting();
+            stage.setMinHeight(420);
+            stage.setMinWidth(640);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();

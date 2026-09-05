@@ -1,3 +1,5 @@
+package shai.gui;
+
 import java.io.IOException;
 import java.util.Collections;
 
@@ -11,12 +13,13 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.shape.Circle;
 
-/**
- * Represents a dialog box consisting of an ImageView to represent the speaker's face
- * and a label containing text from the speaker.
- */
+/** Represents a dialog box containing a speaker image and message text. */
 public class DialogBox extends HBox {
+    /** Width and height of each circular avatar. */
+    private static final double AVATAR_SIZE = 56.0;
+
     @FXML
     private Label dialog;
     @FXML
@@ -34,11 +37,19 @@ public class DialogBox extends HBox {
 
         dialog.setText(text);
         displayPicture.setImage(img);
+        displayPicture.setPreserveRatio(false);
+        displayPicture.setFitWidth(AVATAR_SIZE);
+        displayPicture.setFitHeight(AVATAR_SIZE);
+        clipAvatarToCircle();
     }
 
-    /**
-     * Flips the dialog box such that the ImageView is on the left and text on the right.
-     */
+    /** Clips the avatar image so that it completely fills a circular profile picture. */
+    private void clipAvatarToCircle() {
+        double radius = AVATAR_SIZE / 2;
+        displayPicture.setClip(new Circle(radius, radius, radius));
+    }
+
+    /** Flips the dialog box so that the image appears on the left. */
     private void flip() {
         ObservableList<Node> tmp = FXCollections.observableArrayList(this.getChildren());
         Collections.reverse(tmp);
@@ -47,10 +58,24 @@ public class DialogBox extends HBox {
         dialog.getStyleClass().add("reply-label");
     }
 
+    /**
+     * Creates a dialog box for a user message.
+     *
+     * @param text message text
+     * @param img speaker image
+     * @return dialog box aligned for a user message
+     */
     public static DialogBox getUserDialog(String text, Image img) {
         return new DialogBox(text, img);
     }
 
+    /**
+     * Creates a dialog box for a Shai response.
+     *
+     * @param text response text
+     * @param img speaker image
+     * @return dialog box aligned for a Shai response
+     */
     public static DialogBox getShaiDialog(String text, Image img) {
         var db = new DialogBox(text, img);
         db.flip();

@@ -59,12 +59,16 @@ public class Ui {
                 + "\t \\___ \\| '_ \\ / _` | |\n"
                 + "\t  ___) | | | | (_| | |\n"
                 + "\t |____/|_| |_|\\__,_|_|\n"
-                + "\tYo, what's good. I'm Shai.\n"
-                + "\tDrop the word, I gotchu.\n"
+                + "\t" + getGreeting().replace("\n", "\n\t") + "\n"
                 + LINE
                 + "\n";
 
         output.println(banner);
+    }
+
+    /** Returns the short greeting used by graphical clients. */
+    public String getGreeting() {
+        return "Yo, what's good. I'm Shai.\nDrop the word, I gotchu.";
     }
 
     /** Prints the separator before processing a command. */

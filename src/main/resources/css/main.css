@@ -1,26 +1,30 @@
 .root {
-    main-color: rgb(237, 255, 242);
+    main-color: #f5f7fa;
     -fx-background-color: main-color;
 }
 
 .text-field {
-    -fx-background-color: #d9ffe2;
-    -fx-font: 20px "Arial";
+    -fx-background-color: #ffffff;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 0 14px;
+    -fx-font: 16px "Arial";
 }
 
 .button {
-    -fx-background-color: mediumspringgreen;
-    -fx-font: italic bold 16px "Arial";
+    -fx-background-color: #374151;
+    -fx-background-radius: 12px;
+    -fx-text-fill: #ffffff;
+    -fx-font: bold 15px "Arial";
 }
 
 .button:hover {
-    -fx-background-color: cyan;
-    -fx-font-size: 18px;
+    -fx-background-color: #4b5563;
 }
 
 .button:pressed {
-    -fx-background-color: orange;
-    -fx-font-size: 20px;
+    -fx-background-color: #1f2937;
 }
 
 .scroll-pane,
@@ -34,7 +38,7 @@
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: #ff9cb4;
+    -fx-background-color: #cbd5e1;
     -fx-background-radius: 1em;
 }
 
