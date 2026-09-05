@@ -1,0 +1,19 @@
+.label {
+    -fx-background-color: #e8eef7;
+    -fx-text-fill: #1f2937;
+    -fx-font: 14px "Arial";
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-padding: 8px 12px;
+}
+
+.reply-label {
+    -fx-background-color: #ffffff;
+}
+
+#displayPicture {
+    -fx-effect: dropshadow(gaussian, rgba(15, 23, 42, 0.16), 5, 0.3, 0, 1);
+    -fx-scale-x: 1;
+    -fx-scale-y: 1;
+    -fx-rotate: 0;
+}
