@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import shai.exception.ShaiException;
 import shai.parser.DateTimeParser;
@@ -53,10 +54,9 @@ public class Storage {
             if (taskFile.getParent() != null) {
                 Files.createDirectories(taskFile.getParent());
             }
-            List<String> lines = new ArrayList<>();
-            for (Task task : tasks) {
-                lines.add(formatTask(task));
-            }
+            List<String> lines = StreamSupport.stream(tasks.spliterator(), false)
+                    .map(Storage::formatTask)
+                    .toList();
             Files.write(temporaryFile, lines, StandardCharsets.UTF_8);
             replaceTaskFile(temporaryFile);
         } catch (IOException | SecurityException | IllegalArgumentException e) {
