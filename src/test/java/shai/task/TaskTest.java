@@ -2,7 +2,10 @@ package shai.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +18,20 @@ class TaskTest {
         assertEquals("submit report", task.getDescription());
         assertFalse(task.isDone());
         assertEquals(" ", task.getStatusIcon());
+    }
+
+    @Test
+    void constructor_nullDescription_reportsBrokenTaskContract() {
+        assertThrows(AssertionError.class, () -> new Task(null));
+    }
+
+    @Test
+    void deadlineAndEvent_nullTimeValues_reportBrokenTaskContracts() {
+        assertThrows(AssertionError.class, () -> new Deadline("submit report", null));
+        assertThrows(AssertionError.class,
+                () -> new Event("team meeting", null, LocalDateTime.of(2026, 9, 10, 10, 0)));
+        assertThrows(AssertionError.class,
+                () -> new Event("team meeting", LocalDateTime.of(2026, 9, 10, 10, 0), null));
     }
 
     @Test

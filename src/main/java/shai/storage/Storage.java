@@ -9,7 +9,9 @@ import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 import shai.exception.ShaiException;
@@ -136,6 +138,8 @@ public class Storage {
 
     /** Joins a variable number of task fields using the storage separator. */
     private static String joinFields(String... fields) {
+        assert fields != null && fields.length > 0 : "Storage fields must be provided.";
+        assert Arrays.stream(fields).allMatch(Objects::nonNull) : "Storage fields must not be null.";
         return String.join(" | ", fields);
     }
 
@@ -166,29 +170,31 @@ public class Storage {
 
         Task task;
         switch (type) {
-            case "T":
+            case "T" -> {
                 if (fields.size() != 3) {
                     throw invalidData(lineNumber);
                 }
                 task = new ToDo(description);
-                break;
-            case "D":
+            }
+            case "D" -> {
                 if (fields.size() != 4 || fields.get(3).isBlank()) {
                     throw invalidData(lineNumber);
                 }
                 task = new Deadline(description, parseDateTime(fields.get(3), lineNumber));
-                break;
-            case "E":
+            }
+            case "E" -> {
                 if (fields.size() != 5 || fields.get(3).isBlank() || fields.get(4).isBlank()) {
                     throw invalidData(lineNumber);
                 }
                 task = new Event(description, parseDateTime(fields.get(3), lineNumber),
                         parseDateTime(fields.get(4), lineNumber));
-                break;
-            default:
+            }
+            default -> {
                 throw invalidData(lineNumber);
+            }
         }
 
+        assert task != null : "A valid task record must create a task.";
         if (status.equals("1")) {
             task.markAsDone();
         }
@@ -233,14 +239,11 @@ public class Storage {
 
     /** Converts one escaped character into its stored value. */
     private static char unescapeCharacter(char escaped) {
-        switch (escaped) {
-            case 'n':
-                return '\n';
-            case 'r':
-                return '\r';
-            default:
-                return escaped;
-        }
+        return switch (escaped) {
+            case 'n' -> '\n';
+            case 'r' -> '\r';
+            default -> escaped;
+        };
     }
 
     /** Creates a consistent error for a malformed persisted line. */

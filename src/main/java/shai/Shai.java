@@ -43,6 +43,7 @@ public class Shai {
             ui.showLoadingError(e);
             loadedTasks = new TaskList();
         }
+        assert loadedTasks != null : "Storage must always return a task list.";
         tasks = loadedTasks;
     }
 
@@ -56,6 +57,7 @@ public class Shai {
             ui.showCommandStart();
             try {
                 Command command = parser.parse(input, tasks.size());
+                assert command != null : "The parser must return a command for valid input.";
                 command.execute(tasks, ui, storage);
                 isExit = command.isExit();
             } catch (ShaiException e) {
