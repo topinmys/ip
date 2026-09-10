@@ -24,6 +24,15 @@ class TaskListTest {
     }
 
     @Test
+    void taskList_nullTasks_reportBrokenCollectionContract() {
+        assertThrows(AssertionError.class, () -> new TaskList((List<Task>) null));
+
+        TaskList taskList = new TaskList();
+        assertThrows(AssertionError.class, () -> taskList.add(null));
+        assertThrows(AssertionError.class, () -> taskList.find(null));
+    }
+
+    @Test
     void remove_taskAtIndex_returnsTaskAndShiftsRemainingTasks() {
         Task first = new ToDo("first");
         Task second = new ToDo("second");

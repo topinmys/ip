@@ -32,6 +32,8 @@ public class Parser {
      * @throws ShaiException if the command is unknown or malformed
      */
     public Command parse(String input, int taskCount) throws ShaiException {
+        assert input != null : "The command input must not be null.";
+        assert taskCount >= 0 : "The task count must not be negative.";
         String command = input.trim();
         if (command.equals("bye")) {
             return new ExitCommand();
@@ -137,6 +139,9 @@ public class Parser {
         if (oneBasedIndex < 1 || oneBasedIndex > taskCount) {
             throw new ShaiException("That task number is not in your list yet.");
         }
-        return oneBasedIndex - 1;
+        int zeroBasedIndex = oneBasedIndex - 1;
+        assert zeroBasedIndex >= 0 && zeroBasedIndex < taskCount
+                : "A validated task number must convert to a valid zero-based index.";
+        return zeroBasedIndex;
     }
 }

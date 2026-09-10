@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 /**
  * Owns the tasks currently managed by Shai.
@@ -26,11 +27,14 @@ public class TaskList implements Iterable<Task> {
      * @param tasks tasks to copy into this list
      */
     public TaskList(List<Task> tasks) {
+        assert tasks != null : "The source task list must not be null.";
+        assert tasks.stream().allMatch(Objects::nonNull) : "A task list must not contain null tasks.";
         this.tasks = new ArrayList<>(tasks);
     }
 
     /** Adds a task to the end of the list. */
     public void add(Task task) {
+        assert task != null : "A task list must not contain null tasks.";
         tasks.add(task);
     }
 
@@ -51,6 +55,7 @@ public class TaskList implements Iterable<Task> {
 
     /** Returns a new list containing tasks whose descriptions contain a keyword. */
     public TaskList find(String keyword) {
+        assert keyword != null : "The search keyword must not be null.";
         String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
         List<Task> matchingTasks = tasks.stream()
                 .filter(task -> task.getDescription().toLowerCase(Locale.ROOT)
