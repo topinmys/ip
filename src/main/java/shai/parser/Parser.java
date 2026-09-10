@@ -23,6 +23,19 @@ import shai.task.ToDo;
  * that the caller can display them without knowing the parsing details.</p>
  */
 public class Parser {
+    private static final String BYE_COMMAND = "bye";
+    private static final String LIST_COMMAND = "list";
+    private static final String FIND_COMMAND = "find";
+    private static final String MARK_COMMAND = "mark";
+    private static final String UNMARK_COMMAND = "unmark";
+    private static final String TODO_COMMAND = "todo";
+    private static final String DEADLINE_COMMAND = "deadline";
+    private static final String EVENT_COMMAND = "event";
+    private static final String DELETE_COMMAND = "delete";
+    private static final String BY_MARKER = "/by";
+    private static final String FROM_MARKER = "/from";
+    private static final String TO_MARKER = "/to";
+
     /**
      * Parses and validates a raw command.
      *
@@ -33,70 +46,71 @@ public class Parser {
      */
     public Command parse(String input, int taskCount) throws ShaiException {
         String command = input.trim();
-        if (command.equals("bye")) {
+        if (command.equals(BYE_COMMAND)) {
             return new ExitCommand();
-        } else if (command.equals("list")) {
+        } else if (command.equals(LIST_COMMAND)) {
             return new ListCommand();
-        } else if (isCommand(command, "find")) {
+        } else if (isCommand(command, FIND_COMMAND)) {
             return parseFind(command);
-        } else if (isCommand(command, "mark")) {
-            return new MarkCommand(parseTaskIndex(command, "mark", taskCount));
-        } else if (isCommand(command, "unmark")) {
-            return new UnmarkCommand(parseTaskIndex(command, "unmark", taskCount));
-        } else if (isCommand(command, "todo")) {
+        } else if (isCommand(command, MARK_COMMAND)) {
+            return new MarkCommand(parseTaskIndex(command, MARK_COMMAND, taskCount));
+        } else if (isCommand(command, UNMARK_COMMAND)) {
+            return new UnmarkCommand(parseTaskIndex(command, UNMARK_COMMAND, taskCount));
+        } else if (isCommand(command, TODO_COMMAND)) {
             return parseToDo(command);
-        } else if (isCommand(command, "deadline")) {
+        } else if (isCommand(command, DEADLINE_COMMAND)) {
             return parseDeadline(command);
-        } else if (isCommand(command, "event")) {
+        } else if (isCommand(command, EVENT_COMMAND)) {
             return parseEvent(command);
-        } else if (isCommand(command, "delete")) {
-            return new DeleteCommand(parseTaskIndex(command, "delete", taskCount));
+        } else if (isCommand(command, DELETE_COMMAND)) {
+            return new DeleteCommand(parseTaskIndex(command, DELETE_COMMAND, taskCount));
         }
         throw new ShaiException("Ayy, I don't know that command yet.");
     }
 
     /** Parses a find command and extracts its keyword. */
     private static Command parseFind(String command) throws ShaiException {
-        String keyword = command.substring("find".length()).trim();
-        requireNonEmpty(keyword, "Please provide a keyword after find.");
+        String keyword = command.substring(FIND_COMMAND.length()).trim();
+        requireNonEmpty(keyword, "Please provide a keyword after " + FIND_COMMAND + ".");
         return new FindCommand(keyword);
     }
 
     /** Parses a ToDo command and extracts its description. */
     private static Command parseToDo(String command) throws ShaiException {
-        String description = command.substring("todo".length()).trim();
-        requireNonEmpty(description, "Hold up - I need a description for that todo.");
+        String description = command.substring(TODO_COMMAND.length()).trim();
+        requireNonEmpty(description, "Hold up - I need a description for that " + TODO_COMMAND + ".");
         return new AddCommand(new ToDo(description));
     }
 
     /** Parses a Deadline command and extracts its description and due date. */
     private static Command parseDeadline(String command) throws ShaiException {
-        int indexBy = command.indexOf("/by");
+        int indexBy = command.indexOf(BY_MARKER);
         if (indexBy < 0) {
-            throw new ShaiException("A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.");
+            throw new ShaiException("A deadline needs a date after " + BY_MARKER + ". Try: "
+                    + DEADLINE_COMMAND + " submit report " + BY_MARKER + " 2019-12-01.");
         }
-        String description = command.substring("deadline".length(), indexBy).trim();
-        String byText = command.substring(indexBy + 3).trim();
-        requireNonEmpty(description, "Hold up - I need a description for that deadline.");
-        requireNonEmpty(byText, "Hold up - I need a date after /by.");
+        String description = command.substring(DEADLINE_COMMAND.length(), indexBy).trim();
+        String byText = command.substring(indexBy + BY_MARKER.length()).trim();
+        requireNonEmpty(description, "Hold up - I need a description for that " + DEADLINE_COMMAND + ".");
+        requireNonEmpty(byText, "Hold up - I need a date after " + BY_MARKER + ".");
         return new AddCommand(new Deadline(description, parseDateTime(byText)));
     }
 
     /** Parses an Event command and extracts its description and time range. */
     private static Command parseEvent(String command) throws ShaiException {
-        int indexFrom = command.indexOf("/from");
-        int indexTo = command.indexOf("/to");
+        int indexFrom = command.indexOf(FROM_MARKER);
+        int indexTo = command.indexOf(TO_MARKER);
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
-            throw new ShaiException(
-                    "An event needs /from and /to times. Try: event meeting /from 2019-12-01 1400 "
-                            + "/to 2019-12-01 1600.");
+            throw new ShaiException("An event needs " + FROM_MARKER + " and " + TO_MARKER
+                    + " times. Try: " + EVENT_COMMAND + " meeting " + FROM_MARKER
+                    + " 2019-12-01 1400 " + TO_MARKER + " 2019-12-01 1600.");
         }
-        String description = command.substring("event".length(), indexFrom).trim();
-        String fromText = command.substring(indexFrom + 5, indexTo).trim();
-        String toText = command.substring(indexTo + 3).trim();
-        requireNonEmpty(description, "Hold up - I need a description for that event.");
-        requireNonEmpty(fromText, "Hold up - I need a starting time after /from.");
-        requireNonEmpty(toText, "Hold up - I need an ending time after /to.");
+        String description = command.substring(EVENT_COMMAND.length(), indexFrom).trim();
+        String fromText = command.substring(indexFrom + FROM_MARKER.length(), indexTo).trim();
+        String toText = command.substring(indexTo + TO_MARKER.length()).trim();
+        requireNonEmpty(description, "Hold up - I need a description for that " + EVENT_COMMAND + ".");
+        requireNonEmpty(fromText, "Hold up - I need a starting time after " + FROM_MARKER + ".");
+        requireNonEmpty(toText, "Hold up - I need an ending time after " + TO_MARKER + ".");
         return new AddCommand(new Event(description, parseDateTime(fromText), parseDateTime(toText)));
     }
 
