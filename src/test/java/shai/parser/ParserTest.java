@@ -50,6 +50,14 @@ class ParserTest {
     }
 
     @Test
+    void parse_invalidInternalArguments_reportBrokenParserContracts() {
+        Parser parser = new Parser();
+
+        assertThrows(AssertionError.class, () -> parser.parse(null, 0));
+        assertThrows(AssertionError.class, () -> parser.parse("list", -1));
+    }
+
+    @Test
     void parse_deadlineCommand_createsDeadlineWithParsedDate() throws ShaiException {
         Parser parser = new Parser();
         TaskList tasks = new TaskList();
