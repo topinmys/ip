@@ -8,6 +8,7 @@ import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 
 /** Parses task dates and times and formats them for users and storage. */
 public final class DateTimeParser {
@@ -48,24 +49,37 @@ public final class DateTimeParser {
         String trimmed = value == null ? "" : value.trim();
         DateTimeParseException lastException = null;
 
-        for (DateTimeFormatter formatter : DATE_TIME_FORMATS) {
-            try {
-                return LocalDateTime.parse(trimmed, formatter);
-            } catch (DateTimeParseException e) {
-                lastException = e;
-            }
+        try {
+            return parseUsingFormats(trimmed, DATE_TIME_FORMATS,
+                    formatter -> LocalDateTime.parse(trimmed, formatter));
+        } catch (DateTimeParseException e) {
+            lastException = e;
         }
 
-        for (DateTimeFormatter formatter : DATE_FORMATS) {
-            try {
-                return LocalDate.parse(trimmed, formatter).atStartOfDay();
-            } catch (DateTimeParseException e) {
-                lastException = e;
-            }
+        try {
+            return parseUsingFormats(trimmed, DATE_FORMATS,
+                    formatter -> LocalDate.parse(trimmed, formatter).atStartOfDay());
+        } catch (DateTimeParseException e) {
+            lastException = e;
         }
 
         throw new DateTimeParseException(
                 "Unsupported date/time format", trimmed, 0, lastException);
+    }
+
+    /** Tries each formatter and returns the last parsing error when all fail. */
+    private static LocalDateTime parseUsingFormats(String value, List<DateTimeFormatter> formats,
+                                                   Function<DateTimeFormatter, LocalDateTime> parser)
+            throws DateTimeParseException {
+        DateTimeParseException lastException = null;
+        for (DateTimeFormatter formatter : formats) {
+            try {
+                return parser.apply(formatter);
+            } catch (DateTimeParseException e) {
+                lastException = e;
+            }
+        }
+        throw lastException;
     }
 
     /** Formats a task date or time for display in the command-line interface. */

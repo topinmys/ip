@@ -157,48 +157,62 @@ public class Storage {
     /** Parses one persisted task line. */
     private static Task parseTask(String line, int lineNumber) throws ShaiException {
         List<String> fields = splitFields(line, lineNumber);
+        validateCommonFields(fields, lineNumber);
+        Task task = switch (fields.get(0)) {
+            case "T" -> parseToDo(fields, lineNumber);
+            case "D" -> parseDeadline(fields, lineNumber);
+            case "E" -> parseEvent(fields, lineNumber);
+            default -> throw invalidData(lineNumber);
+        };
+        restoreCompletionStatus(task, fields.get(1));
+        return task;
+    }
+
+    /** Validates the fields shared by every persisted task type. */
+    private static void validateCommonFields(List<String> fields, int lineNumber) throws ShaiException {
         if (fields.size() < 3) {
             throw invalidData(lineNumber);
         }
 
-        String type = fields.get(0);
         String status = fields.get(1);
         String description = fields.get(2);
-        if (description.isBlank() || !(status.equals("0") || status.equals("1"))) {
+        boolean isValidStatus = status.equals("0") || status.equals("1");
+        if (description.isBlank() || !isValidStatus) {
             throw invalidData(lineNumber);
         }
+    }
 
-        Task task;
-        switch (type) {
-            case "T" -> {
-                if (fields.size() != 3) {
-                    throw invalidData(lineNumber);
-                }
-                task = new ToDo(description);
-            }
-            case "D" -> {
-                if (fields.size() != 4 || fields.get(3).isBlank()) {
-                    throw invalidData(lineNumber);
-                }
-                task = new Deadline(description, parseDateTime(fields.get(3), lineNumber));
-            }
-            case "E" -> {
-                if (fields.size() != 5 || fields.get(3).isBlank() || fields.get(4).isBlank()) {
-                    throw invalidData(lineNumber);
-                }
-                task = new Event(description, parseDateTime(fields.get(3), lineNumber),
-                        parseDateTime(fields.get(4), lineNumber));
-            }
-            default -> {
-                throw invalidData(lineNumber);
-            }
+    /** Creates a ToDo from its persisted fields. */
+    private static Task parseToDo(List<String> fields, int lineNumber) throws ShaiException {
+        if (fields.size() != 3) {
+            throw invalidData(lineNumber);
         }
+        return new ToDo(fields.get(2));
+    }
 
+    /** Creates a Deadline from its persisted fields. */
+    private static Task parseDeadline(List<String> fields, int lineNumber) throws ShaiException {
+        if (fields.size() != 4 || fields.get(3).isBlank()) {
+            throw invalidData(lineNumber);
+        }
+        return new Deadline(fields.get(2), parseDateTime(fields.get(3), lineNumber));
+    }
+
+    /** Creates an Event from its persisted fields. */
+    private static Task parseEvent(List<String> fields, int lineNumber) throws ShaiException {
+        if (fields.size() != 5 || fields.get(3).isBlank() || fields.get(4).isBlank()) {
+            throw invalidData(lineNumber);
+        }
+        return new Event(fields.get(2), parseDateTime(fields.get(3), lineNumber),
+                parseDateTime(fields.get(4), lineNumber));
+    }
+
+    /** Restores the completion status encoded in a persisted task line. */
+    private static void restoreCompletionStatus(Task task, String status) {
         assert task != null : "A valid task record must create a task.";
         if (status.equals("1")) {
             task.markAsDone();
         }
-        return task;
     }
 
     /** Parses a date or time restored from the task file. */

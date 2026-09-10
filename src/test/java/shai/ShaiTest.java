@@ -34,4 +34,22 @@ class ShaiTest {
                 "Here are the tasks in your list:",
                 "1.[T][ ] buy milk"), shai.getResponse("list"));
     }
+
+    @Test
+    void getResponse_findKeyword_returnsMatchingTasksOnly() {
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
+        shai.getResponse("todo read book");
+        shai.getResponse("todo buy milk");
+
+        assertEquals(String.join(System.lineSeparator(),
+                "Here are the matching tasks in your list:",
+                "1.[T][ ] read book"), shai.getResponse("find BOOK"));
+    }
+
+    @Test
+    void getResponse_invalidCommand_returnsUserFriendlyError() {
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
+
+        assertEquals("Ayy, I don't know that command yet.", shai.getResponse("unknown"));
+    }
 }

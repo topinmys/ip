@@ -43,7 +43,6 @@ public class Shai {
             ui.showLoadingError(e);
             loadedTasks = new TaskList();
         }
-        assert loadedTasks != null : "Storage must always return a task list.";
         tasks = loadedTasks;
     }
 
@@ -56,12 +55,7 @@ public class Shai {
             String input = ui.readCommand();
             ui.showCommandStart();
             try {
-                Command command = parser.parse(input, tasks.size());
-                assert command != null : "The parser must return a command for valid input.";
-                command.execute(tasks, ui, storage);
-                isExit = command.isExit();
-            } catch (ShaiException e) {
-                ui.showError(e);
+                isExit = executeCommand(input, ui);
             } finally {
                 ui.showCommandEnd();
             }
@@ -79,15 +73,23 @@ public class Shai {
         PrintStream responseStream = new PrintStream(responseOutput, true, StandardCharsets.UTF_8);
         Ui responseUi = new Ui(responseStream);
 
-        try {
-            Command command = parser.parse(input, tasks.size());
-            command.execute(tasks, responseUi, storage);
-        } catch (ShaiException e) {
-            responseUi.showError(e);
-        }
+        executeCommand(input, responseUi);
 
         responseStream.flush();
         return responseOutput.toString(StandardCharsets.UTF_8).replace("\t", "").strip();
+    }
+
+    /** Executes a command for the supplied interface and reports expected errors. */
+    private boolean executeCommand(String input, Ui commandUi) {
+        try {
+            Command command = parser.parse(input, tasks.size());
+            assert command != null : "The parser must return a command for valid input.";
+            command.execute(tasks, commandUi, storage);
+            return command.isExit();
+        } catch (ShaiException e) {
+            commandUi.showError(e);
+            return false;
+        }
     }
 
     /** Returns the introductory message shown to non-console clients. */

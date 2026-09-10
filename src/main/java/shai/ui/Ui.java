@@ -98,15 +98,17 @@ public class Ui {
 
     /** Prints every task currently stored in the task list. */
     public void showTasks(TaskList tasks) {
-        output.println("\tHere are the tasks in your list:");
-        for (int i = 1; i <= tasks.size(); i++) {
-            output.println("\t" + i + "." + tasks.get(i - 1));
-        }
+        showTaskList(tasks, "\tHere are the tasks in your list:");
     }
 
     /** Prints every task whose description contains the requested keyword. */
     public void showMatchingTasks(TaskList tasks) {
-        output.println("\tHere are the matching tasks in your list:");
+        showTaskList(tasks, "\tHere are the matching tasks in your list:");
+    }
+
+    /** Prints a task list under the supplied heading. */
+    private void showTaskList(TaskList tasks, String heading) {
+        output.println(heading);
         for (int i = 1; i <= tasks.size(); i++) {
             output.println("\t" + i + "." + tasks.get(i - 1));
         }
