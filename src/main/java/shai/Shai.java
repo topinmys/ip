@@ -83,6 +83,7 @@ public class Shai {
     private boolean executeCommand(String input, Ui commandUi) {
         try {
             Command command = parser.parse(input, tasks.size());
+            assert command != null : "The parser must return a command for valid input.";
             command.execute(tasks, commandUi, storage);
             return command.isExit();
         } catch (ShaiException e) {
