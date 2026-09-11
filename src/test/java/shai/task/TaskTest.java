@@ -28,10 +28,10 @@ class TaskTest {
     @Test
     void deadlineAndEvent_nullTimeValues_reportBrokenTaskContracts() {
         assertThrows(AssertionError.class, () -> new Deadline("submit report", null));
-        assertThrows(AssertionError.class,
-                () -> new Event("team meeting", null, LocalDateTime.of(2026, 9, 10, 10, 0)));
-        assertThrows(AssertionError.class,
-                () -> new Event("team meeting", LocalDateTime.of(2026, 9, 10, 10, 0), null));
+        assertThrows(AssertionError.class, () -> new Event("team meeting", null,
+                LocalDateTime.of(2026, 9, 10, 10, 0)));
+        assertThrows(AssertionError.class, () -> new Event("team meeting",
+                LocalDateTime.of(2026, 9, 10, 10, 0), null));
     }
 
     @Test
