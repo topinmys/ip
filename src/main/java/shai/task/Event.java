@@ -14,6 +14,9 @@ public class Event extends Task {
     /** The date or time when the event ends. */
     protected LocalDateTime to;
 
+    /** The number of minutes before the event when its reminder should appear. */
+    protected long reminderMinutesBefore;
+
     /**
      * Creates an Event that is initially not done.
      *
@@ -22,11 +25,28 @@ public class Event extends Task {
      * @param to the date or time when the event ends
      */
     public Event(String description, LocalDateTime from, LocalDateTime to) {
+        this(description, from, to, Reminder.DEFAULT_MINUTES_BEFORE);
+    }
+
+    /**
+     * Creates an Event with a specified reminder lead time.
+     *
+     * @param description the text describing the Event
+     * @param from the date or time when the event starts
+     * @param to the date or time when the event ends
+     * @param reminderMinutesBefore minutes before the event, or {@link Reminder#DISABLED}
+     * @throws AssertionError if an event time or reminder value is invalid
+     */
+    public Event(String description, LocalDateTime from, LocalDateTime to, long reminderMinutesBefore) {
         super(description);
         assert from != null : "An event must have a starting date or time.";
         assert to != null : "An event must have an ending date or time.";
+        assert from.isBefore(to) : "An event must end after it starts.";
+        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
+                : "An event must have a valid reminder value.";
         this.from = from;
         this.to = to;
+        this.reminderMinutesBefore = reminderMinutesBefore;
     }
 
     /**
@@ -45,6 +65,18 @@ public class Event extends Task {
      */
     public LocalDateTime getTo() {
         return to;
+    }
+
+    /** Returns the number of minutes before this event for its reminder. */
+    public long getReminderMinutesBefore() {
+        return reminderMinutesBefore;
+    }
+
+    /** Sets the number of minutes before this event for its reminder. */
+    public void setReminderMinutesBefore(long reminderMinutesBefore) {
+        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
+                : "An event must have a valid reminder value.";
+        this.reminderMinutesBefore = reminderMinutesBefore;
     }
 
     /**

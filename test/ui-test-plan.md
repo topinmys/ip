@@ -880,3 +880,155 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
   ```
+## Test Case 18: Configure and disable a reminder
+
+- Aim: Verify that a deadline receives a configurable reminder and that the reminder can be disabled.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  deadline submit report /by 2099-09-15 1700
+  remind 1 /before 3h
+  remind 1 /off
+  remind
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Reminder updated for task 1:
+	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
+	  I'll remind you at Sep 15 2099, 2:00 PM.
+	____________________________________________________________
+
+	____________________________________________________________
+	Reminder disabled for task 1:
+	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
+	____________________________________________________________
+
+	____________________________________________________________
+	No reminders on the board - stay ahead of the game!
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 19: Reject invalid reminder commands
+
+- Aim: Verify that reminders cannot be configured for ToDos and that malformed reminder commands are rejected.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  todo buy milk
+  remind 1 /before 1h
+  remind 1
+  remind 1 /before
+  remind 1 /before later
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [T][ ] buy milk
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Only deadlines and events can have reminders.
+	____________________________________________________________
+
+	____________________________________________________________
+	A reminder command must be: remind; remind <task number> /before <duration>; or remind <task number> /off.
+	____________________________________________________________
+
+	____________________________________________________________
+	Please provide a reminder duration after /before. Try: remind 1 /before 2h.
+	____________________________________________________________
+
+	____________________________________________________________
+	Reminder duration must be a non-negative number followed by m, h, or d, for example 30m or 1d.
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```
+
+## Test Case 20: Keep automatic reminder notices within the next day
+
+- Aim: Verify that a reminder far beyond the automatic one-day notice window
+  does not add an unsolicited alert to normal command responses.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  deadline submit report /by 2099-09-15 1700
+  list
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, what's good. I'm Shai.
+	Drop the word, I gotchu.
+	____________________________________________________________
+
+	____________________________________________________________
+	Got it. I've added this task:
+	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
+	Now you have 1 tasks in the list.
+	____________________________________________________________
+
+	____________________________________________________________
+	Here are the tasks in your list:
+	1.[D][ ] submit report (by: Sep 15 2099, 5:00 PM)
+	____________________________________________________________
+
+	____________________________________________________________
+	Say less. Stay blessed, peace!
+	____________________________________________________________
+
+  ```

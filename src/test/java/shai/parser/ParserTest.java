@@ -7,7 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,6 +22,7 @@ import shai.command.ExitCommand;
 import shai.command.FindCommand;
 import shai.command.ListCommand;
 import shai.command.MarkCommand;
+import shai.command.ReminderCommand;
 import shai.command.UnmarkCommand;
 import shai.exception.ShaiException;
 import shai.storage.Storage;
@@ -43,6 +47,9 @@ class ParserTest {
         assertInstanceOf(MarkCommand.class, parser.parse("mark 1", 1));
         assertInstanceOf(UnmarkCommand.class, parser.parse("unmark 1", 1));
         assertInstanceOf(DeleteCommand.class, parser.parse("delete 1", 1));
+        assertInstanceOf(ReminderCommand.class, parser.parse("remind", 0));
+        assertInstanceOf(ReminderCommand.class, parser.parse("remind 1 /before 3h", 1));
+        assertInstanceOf(ReminderCommand.class, parser.parse("remind 1 /off", 1));
         assertInstanceOf(AddCommand.class, parser.parse("todo buy milk", 0));
         assertInstanceOf(AddCommand.class, parser.parse("deadline return book /by 2019-12-01", 0));
         assertInstanceOf(AddCommand.class,
@@ -109,6 +116,31 @@ class ParserTest {
         assertParseError(parser, "mark 2", 1, "That task number is not in your list yet.");
         assertParseError(parser, "deadline report /by 2019-02-30", 0,
                 "Invalid date/time. Use yyyy-MM-dd HHmm, for example 2019-12-02 1800.");
+        assertParseError(parser, "remind 1", 1,
+                "A reminder command must be: remind; remind <task number> /before <duration>; or "
+                        + "remind <task number> /off.");
+        assertParseError(parser, "remind 1 /before", 1,
+                "Please provide a reminder duration after /before. Try: remind 1 /before 2h.");
+        assertParseError(parser, "remind 1 /before later", 1,
+                "Reminder duration must be a non-negative number followed by m, h, or d, for example "
+                        + "30m or 1d.");
+        assertParseError(parser,
+                "event team meeting /from 2019-12-01 1600 /to 2019-12-01 1400", 0,
+                "An event must end after it starts.");
+    }
+
+    @Test
+    void parse_reminderWithClock_usesSuppliedClock() throws ShaiException {
+        Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
+        Parser parser = new Parser(clock);
+        TaskList tasks = new TaskList();
+        Command command = parser.parse("deadline submit report /by 2026-09-15 1700", 0);
+        command.execute(tasks, new Ui(), storage());
+
+        parser.parse("remind 1 /before 3h", tasks.size()).execute(tasks, new Ui(), storage());
+
+        Deadline deadline = assertInstanceOf(Deadline.class, tasks.get(0));
+        assertEquals(180, deadline.getReminderMinutesBefore());
     }
 
     private Storage storage() {

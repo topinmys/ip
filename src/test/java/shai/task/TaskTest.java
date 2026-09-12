@@ -35,6 +35,23 @@ class TaskTest {
     }
 
     @Test
+    void event_endBeforeStart_reportsBrokenTaskContract() {
+        assertThrows(AssertionError.class, () -> new Event("team meeting",
+                LocalDateTime.of(2026, 9, 10, 12, 0),
+                LocalDateTime.of(2026, 9, 10, 10, 0)));
+    }
+
+    @Test
+    void timedTask_defaultReminder_usesOneDayBeforeTarget() {
+        Deadline deadline = new Deadline("submit report", LocalDateTime.of(2026, 9, 15, 17, 0));
+        Event event = new Event("team meeting", LocalDateTime.of(2026, 9, 18, 14, 0),
+                LocalDateTime.of(2026, 9, 18, 16, 0));
+
+        assertEquals(Reminder.DEFAULT_MINUTES_BEFORE, deadline.getReminderMinutesBefore());
+        assertEquals(Reminder.DEFAULT_MINUTES_BEFORE, event.getReminderMinutesBefore());
+    }
+
+    @Test
     void markAsDone_incompleteTask_becomesCompleted() {
         Task task = new Task("submit report");
 

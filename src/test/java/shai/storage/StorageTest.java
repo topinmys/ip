@@ -15,6 +15,7 @@ import org.junit.jupiter.api.io.TempDir;
 import shai.exception.ShaiException;
 import shai.task.Deadline;
 import shai.task.Event;
+import shai.task.Reminder;
 import shai.task.TaskList;
 import shai.task.ToDo;
 
@@ -55,6 +56,34 @@ class StorageTest {
         assertEquals(event.toString(), loaded.get(2).toString());
         assertFalse(loaded.get(1).isDone());
         assertFalse(loaded.get(2).isDone());
+    }
+
+    @Test
+    void saveAndLoadTasks_customReminders_roundTripsReminderSettings() throws ShaiException {
+        TaskList original = new TaskList();
+        original.add(new Deadline("submit report", LocalDateTime.of(2026, 9, 15, 17, 0), 180));
+        original.add(new Event("team meeting", LocalDateTime.of(2026, 9, 18, 14, 0),
+                LocalDateTime.of(2026, 9, 18, 16, 0), Reminder.DISABLED));
+
+        Storage storage = storage();
+        storage.saveTasks(original);
+        TaskList loaded = storage.loadTasks();
+
+        assertEquals(180, ((Deadline) loaded.get(0)).getReminderMinutesBefore());
+        assertEquals(Reminder.DISABLED, ((Event) loaded.get(1)).getReminderMinutesBefore());
+    }
+
+    @Test
+    void loadTasks_legacyTimedTasks_receiveDefaultReminders() throws Exception {
+        Path file = temporaryDirectory.resolve("tasks.txt");
+        Files.writeString(file, String.join(System.lineSeparator(),
+                "D | 0 | submit report | 2026-09-15 1700",
+                "E | 0 | team meeting | 2026-09-18 1400 | 2026-09-18 1600"));
+
+        TaskList loaded = new Storage(file.toString()).loadTasks();
+
+        assertEquals(Reminder.DEFAULT_MINUTES_BEFORE, ((Deadline) loaded.get(0)).getReminderMinutesBefore());
+        assertEquals(Reminder.DEFAULT_MINUTES_BEFORE, ((Event) loaded.get(1)).getReminderMinutesBefore());
     }
 
     @Test

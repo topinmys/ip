@@ -1,7 +1,9 @@
 package shai.task;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -14,6 +16,9 @@ import java.util.Objects;
  * callers do not need to manage the underlying collection directly.</p>
  */
 public class TaskList implements Iterable<Task> {
+    private static final long UPCOMING_WINDOW_DAYS = 7;
+    private static final long AUTOMATIC_REMINDER_WINDOW_HOURS = 24;
+
     private final List<Task> tasks;
 
     /** Creates an empty task list. */
@@ -62,6 +67,87 @@ public class TaskList implements Iterable<Task> {
                         .contains(normalizedKeyword))
                 .toList();
         return new TaskList(matchingTasks);
+    }
+
+    /**
+     * Returns incomplete reminders scheduled within the next seven days.
+     *
+     * @param now the current time used as the start of the window
+     * @return reminders sorted by reminder time and then task-list index
+     */
+    public List<Reminder> findUpcomingReminders(LocalDateTime now) {
+        assert now != null : "The current time must not be null.";
+        LocalDateTime windowEnd = now.plusDays(UPCOMING_WINDOW_DAYS);
+        List<Reminder> reminders = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            LocalDateTime targetTime = getTargetTime(task);
+            LocalDateTime reminderTime = getReminderTime(task);
+            if (task.isDone() || targetTime == null || reminderTime == null
+                    || targetTime.isBefore(now) || reminderTime.isBefore(now)
+                    || reminderTime.isAfter(windowEnd)) {
+                continue;
+            }
+            reminders.add(new Reminder(i, task, reminderTime));
+        }
+        return reminders.stream()
+                .sorted(Comparator.comparing(Reminder::getReminderTime)
+                        .thenComparingInt(Reminder::getTaskIndex))
+                .toList();
+    }
+
+    /**
+     * Returns incomplete reminders that are due within the next day.
+     *
+     * <p>A reminder whose scheduled time has passed is included when its task
+     * is still in the future, so the user can see a notice after restarting
+     * Shai without receiving a notice for an already overdue task.</p>
+     *
+     * @param now the current time used as the end of the overdue portion
+     * @return reminders sorted by reminder time and then task-list index
+     */
+    public List<Reminder> findRemindersDueSoon(LocalDateTime now) {
+        assert now != null : "The current time must not be null.";
+        LocalDateTime windowEnd = now.plusHours(AUTOMATIC_REMINDER_WINDOW_HOURS);
+        List<Reminder> reminders = new ArrayList<>();
+        for (int i = 0; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+            LocalDateTime targetTime = getTargetTime(task);
+            LocalDateTime reminderTime = getReminderTime(task);
+            if (task.isDone() || targetTime == null || reminderTime == null
+                    || !targetTime.isAfter(now) || reminderTime.isAfter(windowEnd)) {
+                continue;
+            }
+            reminders.add(new Reminder(i, task, reminderTime));
+        }
+        return reminders.stream()
+                .sorted(Comparator.comparing(Reminder::getReminderTime)
+                        .thenComparingInt(Reminder::getTaskIndex))
+                .toList();
+    }
+
+    /** Returns the target time for a task type that can have a reminder. */
+    private static LocalDateTime getTargetTime(Task task) {
+        if (task instanceof Deadline deadline) {
+            return deadline.getBy();
+        }
+        if (task instanceof Event event) {
+            return event.getFrom();
+        }
+        return null;
+    }
+
+    /** Returns the scheduled reminder time for a task type that can have one. */
+    private static LocalDateTime getReminderTime(Task task) {
+        if (task instanceof Deadline deadline
+                && deadline.getReminderMinutesBefore() != Reminder.DISABLED) {
+            return deadline.getBy().minusMinutes(deadline.getReminderMinutesBefore());
+        }
+        if (task instanceof Event event
+                && event.getReminderMinutesBefore() != Reminder.DISABLED) {
+            return event.getFrom().minusMinutes(event.getReminderMinutesBefore());
+        }
+        return null;
     }
 
     /**

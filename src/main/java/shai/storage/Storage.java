@@ -18,6 +18,7 @@ import shai.exception.ShaiException;
 import shai.parser.DateTimeParser;
 import shai.task.Deadline;
 import shai.task.Event;
+import shai.task.Reminder;
 import shai.task.Task;
 import shai.task.TaskList;
 import shai.task.ToDo;
@@ -123,7 +124,8 @@ public class Storage {
                     "D",
                     status,
                     escapeField(task.getDescription()),
-                    escapeField(DateTimeParser.formatForStorage(deadline.getBy())));
+                    escapeField(DateTimeParser.formatForStorage(deadline.getBy())),
+                    String.valueOf(deadline.getReminderMinutesBefore()));
         }
         if (task instanceof Event event) {
             return joinFields(
@@ -131,7 +133,8 @@ public class Storage {
                     status,
                     escapeField(task.getDescription()),
                     escapeField(DateTimeParser.formatForStorage(event.getFrom())),
-                    escapeField(DateTimeParser.formatForStorage(event.getTo())));
+                    escapeField(DateTimeParser.formatForStorage(event.getTo())),
+                    String.valueOf(event.getReminderMinutesBefore()));
         }
         return joinFields("T", status, escapeField(task.getDescription()));
     }
@@ -192,19 +195,30 @@ public class Storage {
 
     /** Creates a Deadline from its persisted fields. */
     private static Task parseDeadline(List<String> fields, int lineNumber) throws ShaiException {
-        if (fields.size() != 4 || fields.get(3).isBlank()) {
+        if ((fields.size() != 4 && fields.size() != 5) || fields.get(3).isBlank()) {
             throw invalidData(lineNumber);
         }
-        return new Deadline(fields.get(2), parseDateTime(fields.get(3), lineNumber));
+        long reminderMinutesBefore = fields.size() == 4
+                ? Reminder.DEFAULT_MINUTES_BEFORE
+                : parseReminderMinutes(fields.get(4), lineNumber);
+        return new Deadline(fields.get(2), parseDateTime(fields.get(3), lineNumber), reminderMinutesBefore);
     }
 
     /** Creates an Event from its persisted fields. */
     private static Task parseEvent(List<String> fields, int lineNumber) throws ShaiException {
-        if (fields.size() != 5 || fields.get(3).isBlank() || fields.get(4).isBlank()) {
+        if ((fields.size() != 5 && fields.size() != 6)
+                || fields.get(3).isBlank() || fields.get(4).isBlank()) {
             throw invalidData(lineNumber);
         }
-        return new Event(fields.get(2), parseDateTime(fields.get(3), lineNumber),
-                parseDateTime(fields.get(4), lineNumber));
+        LocalDateTime from = parseDateTime(fields.get(3), lineNumber);
+        LocalDateTime to = parseDateTime(fields.get(4), lineNumber);
+        if (!from.isBefore(to)) {
+            throw invalidData(lineNumber);
+        }
+        long reminderMinutesBefore = fields.size() == 5
+                ? Reminder.DEFAULT_MINUTES_BEFORE
+                : parseReminderMinutes(fields.get(5), lineNumber);
+        return new Event(fields.get(2), from, to, reminderMinutesBefore);
     }
 
     /** Restores the completion status encoded in a persisted task line. */
@@ -220,6 +234,19 @@ public class Storage {
         try {
             return DateTimeParser.parse(value);
         } catch (DateTimeParseException e) {
+            throw invalidData(lineNumber);
+        }
+    }
+
+    /** Parses a persisted reminder lead time. */
+    private static long parseReminderMinutes(String value, int lineNumber) throws ShaiException {
+        try {
+            long minutesBefore = Long.parseLong(value);
+            if (!Reminder.isValidMinutesBefore(minutesBefore)) {
+                throw new NumberFormatException();
+            }
+            return minutesBefore;
+        } catch (NumberFormatException e) {
             throw invalidData(lineNumber);
         }
     }

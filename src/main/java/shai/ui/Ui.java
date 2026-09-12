@@ -2,9 +2,13 @@ package shai.ui;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Scanner;
 
 import shai.exception.ShaiException;
+import shai.parser.DateTimeParser;
+import shai.task.Reminder;
 import shai.task.Task;
 import shai.task.TaskList;
 
@@ -104,6 +108,47 @@ public class Ui {
     /** Prints every task whose description contains the requested keyword. */
     public void showMatchingTasks(TaskList tasks) {
         showTaskList(tasks, "\tHere are the matching tasks in your list:");
+    }
+
+    /** Prints reminders scheduled within the supported upcoming window. */
+    public void showReminders(TaskList tasks, LocalDateTime now) {
+        List<Reminder> reminders = tasks.findUpcomingReminders(now);
+        if (reminders.isEmpty()) {
+            output.println("\tNo reminders on the board - stay ahead of the game!");
+            return;
+        }
+
+        output.println("\tHere are your upcoming reminders:");
+        for (Reminder reminder : reminders) {
+            output.println("\t" + (reminder.getTaskIndex() + 1) + "." + reminder.getTask()
+                    + " (reminder: " + DateTimeParser.formatForDisplay(reminder.getReminderTime()) + ")");
+        }
+    }
+
+    /** Prints automatic notices for reminders due soon. */
+    public void showAutomaticReminders(List<Reminder> reminders) {
+        if (reminders.isEmpty()) {
+            return;
+        }
+
+        output.println("\tReminder alert:");
+        for (Reminder reminder : reminders) {
+            output.println("\t" + (reminder.getTaskIndex() + 1) + "." + reminder.getTask()
+                    + " (reminder: " + DateTimeParser.formatForDisplay(reminder.getReminderTime()) + ")");
+        }
+    }
+
+    /** Prints the response for updating a reminder. */
+    public void showReminderUpdated(int taskNumber, Task task, LocalDateTime reminderTime) {
+        output.println("\tReminder updated for task " + taskNumber + ":");
+        output.println("\t  " + task);
+        output.println("\t  I'll remind you at " + DateTimeParser.formatForDisplay(reminderTime) + ".");
+    }
+
+    /** Prints the response for disabling a reminder. */
+    public void showReminderDisabled(int taskNumber, Task task) {
+        output.println("\tReminder disabled for task " + taskNumber + ":");
+        output.println("\t  " + task);
     }
 
     /** Prints a task list under the supplied heading. */
