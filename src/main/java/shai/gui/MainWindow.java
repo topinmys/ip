@@ -39,6 +39,10 @@ public class MainWindow extends AnchorPane {
     /** Adds Shai's introductory message to the conversation. */
     public void showGreeting() {
         dialogContainer.getChildren().add(DialogBox.getShaiDialog(shai.getGreeting(), shaiImage));
+        String startupReminder = shai.getStartupReminderResponse();
+        if (!startupReminder.isEmpty()) {
+            dialogContainer.getChildren().add(DialogBox.getShaiDialog(startupReminder, shaiImage));
+        }
     }
 
     /**

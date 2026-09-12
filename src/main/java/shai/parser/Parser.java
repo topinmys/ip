@@ -1,5 +1,6 @@
 package shai.parser;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
@@ -10,10 +11,12 @@ import shai.command.ExitCommand;
 import shai.command.FindCommand;
 import shai.command.ListCommand;
 import shai.command.MarkCommand;
+import shai.command.ReminderCommand;
 import shai.command.UnmarkCommand;
 import shai.exception.ShaiException;
 import shai.task.Deadline;
 import shai.task.Event;
+import shai.task.Reminder;
 import shai.task.ToDo;
 
 /**
@@ -32,9 +35,25 @@ public class Parser {
     private static final String DEADLINE_COMMAND = "deadline";
     private static final String EVENT_COMMAND = "event";
     private static final String DELETE_COMMAND = "delete";
+    private static final String REMIND_COMMAND = "remind";
     private static final String BY_MARKER = "/by";
     private static final String FROM_MARKER = "/from";
     private static final String TO_MARKER = "/to";
+    private static final String BEFORE_MARKER = "/before";
+    private static final String OFF_MARKER = "/off";
+
+    private final Clock clock;
+
+    /** Creates a parser that uses the system clock for reminder validation. */
+    public Parser() {
+        this(Clock.systemDefaultZone());
+    }
+
+    /** Creates a parser that uses the supplied clock for reminder validation. */
+    public Parser(Clock clock) {
+        assert clock != null : "The parser clock must not be null.";
+        this.clock = clock;
+    }
 
     /**
      * Parses and validates a raw command.
@@ -66,6 +85,8 @@ public class Parser {
             return parseEvent(command);
         } else if (isCommand(command, DELETE_COMMAND)) {
             return new DeleteCommand(parseTaskIndex(command, DELETE_COMMAND, taskCount));
+        } else if (isCommand(command, REMIND_COMMAND)) {
+            return parseReminder(command, taskCount);
         }
         throw new ShaiException("Ayy, I don't know that command yet.");
     }
@@ -113,7 +134,79 @@ public class Parser {
         requireNonEmpty(description, "Hold up - I need a description for that " + EVENT_COMMAND + ".");
         requireNonEmpty(fromText, "Hold up - I need a starting time after " + FROM_MARKER + ".");
         requireNonEmpty(toText, "Hold up - I need an ending time after " + TO_MARKER + ".");
-        return new AddCommand(new Event(description, parseDateTime(fromText), parseDateTime(toText)));
+        LocalDateTime from = parseDateTime(fromText);
+        LocalDateTime to = parseDateTime(toText);
+        if (!from.isBefore(to)) {
+            throw new ShaiException("An event must end after it starts.");
+        }
+        return new AddCommand(new Event(description, from, to));
+    }
+
+    /** Parses a reminder listing, configuration, or disabling command. */
+    private Command parseReminder(String command, int taskCount) throws ShaiException {
+        if (command.equals(REMIND_COMMAND)) {
+            return new ReminderCommand(clock);
+        }
+
+        String arguments = command.substring(REMIND_COMMAND.length()).trim();
+        int separatorIndex = arguments.indexOf(' ');
+        String taskNumber = separatorIndex < 0 ? arguments : arguments.substring(0, separatorIndex);
+        int taskIndex = parseTaskIndexValue(taskNumber, REMIND_COMMAND, taskCount);
+        if (separatorIndex < 0) {
+            throw invalidReminderSyntax();
+        }
+
+        String action = arguments.substring(separatorIndex + 1).trim();
+        if (action.equals(OFF_MARKER)) {
+            return new ReminderCommand(taskIndex, clock);
+        }
+        if (!action.startsWith(BEFORE_MARKER)) {
+            throw invalidReminderSyntax();
+        }
+
+        String duration = action.substring(BEFORE_MARKER.length()).trim();
+        requireNonEmpty(duration, "Please provide a reminder duration after " + BEFORE_MARKER
+                + ". Try: remind 1 /before 2h.");
+        return new ReminderCommand(taskIndex, parseReminderMinutes(duration), clock);
+    }
+
+    /** Parses a duration such as {@code 30m}, {@code 2h}, or {@code 1d}. */
+    private static long parseReminderMinutes(String value) throws ShaiException {
+        if (!value.matches("\\d+[mhd]")) {
+            throw new ShaiException("Reminder duration must be a non-negative number followed by "
+                    + "m, h, or d, for example 30m or 1d.");
+        }
+
+        long amount;
+        try {
+            amount = Long.parseLong(value.substring(0, value.length() - 1));
+        } catch (NumberFormatException e) {
+            throw new ShaiException("Reminder duration must be a non-negative number followed by "
+                    + "m, h, or d, for example 30m or 1d.");
+        }
+
+        char unit = value.charAt(value.length() - 1);
+        long multiplier = switch (unit) {
+            case 'm' -> 1;
+            case 'h' -> 60;
+            case 'd' -> 24 * 60;
+            default -> 0;
+        };
+        try {
+            long minutes = Math.multiplyExact(amount, multiplier);
+            if (!Reminder.isValidMinutesBefore(minutes) || minutes == Reminder.DISABLED) {
+                throw new ArithmeticException();
+            }
+            return minutes;
+        } catch (ArithmeticException e) {
+            throw new ShaiException("Reminder duration is too large.");
+        }
+    }
+
+    /** Returns the standard error for an incomplete reminder command. */
+    private static ShaiException invalidReminderSyntax() {
+        return new ShaiException("A reminder command must be: remind; remind <task number> "
+                + "/before <duration>; or remind <task number> /off.");
     }
 
     /** Parses a task date and converts parser errors into a user-friendly command error. */
@@ -141,6 +234,14 @@ public class Parser {
     private static int parseTaskIndex(String command, String commandName, int taskCount)
             throws ShaiException {
         String argument = command.substring(commandName.length()).trim();
+        requireNonEmpty(argument, "Please provide a task number after " + commandName + ".");
+
+        return parseTaskIndexValue(argument, commandName, taskCount);
+    }
+
+    /** Parses and validates a task-number token. */
+    private static int parseTaskIndexValue(String argument, String commandName, int taskCount)
+            throws ShaiException {
         requireNonEmpty(argument, "Please provide a task number after " + commandName + ".");
 
         final int oneBasedIndex;

@@ -3,11 +3,19 @@ package shai;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import shai.command.Command;
 import shai.exception.ShaiException;
 import shai.parser.Parser;
 import shai.storage.Storage;
+import shai.task.Reminder;
+import shai.task.Task;
 import shai.task.TaskList;
 import shai.ui.Ui;
 
@@ -27,14 +35,26 @@ public class Shai {
     /** Stores the tasks managed during this run. */
     private final TaskList tasks;
 
+    /** Supplies the current time for automatic reminder checks. */
+    private final Clock clock;
+
+    /** Records reminders already shown during this application session. */
+    private final Map<Task, LocalDateTime> shownReminderTimes;
+
     /**
      * Creates Shai using the specified task-data file.
      *
      * @param filePath path to the file used for loading and saving tasks
      */
     public Shai(String filePath) {
+        this(filePath, Clock.systemDefaultZone());
+    }
+
+    /** Creates Shai using the specified task-data file and clock. */
+    Shai(String filePath, Clock clock) {
         ui = new Ui();
-        parser = new Parser();
+        this.clock = clock;
+        parser = new Parser(clock);
         storage = new Storage(filePath);
         TaskList loadedTasks;
         try {
@@ -44,11 +64,13 @@ public class Shai {
             loadedTasks = new TaskList();
         }
         tasks = loadedTasks;
+        shownReminderTimes = new HashMap<>();
     }
 
     /** Starts the greeting and processes commands until the user says goodbye. */
     public void run() {
         ui.showBanner();
+        showAutomaticReminders(ui);
 
         boolean isExit = false;
         while (!isExit && ui.hasNextCommand()) {
@@ -79,17 +101,46 @@ public class Shai {
         return responseOutput.toString(StandardCharsets.UTF_8).replace("\t", "").strip();
     }
 
+    /** Returns the automatic reminder notice shown when a graphical client starts. */
+    public String getStartupReminderResponse() {
+        ByteArrayOutputStream responseOutput = new ByteArrayOutputStream();
+        PrintStream responseStream = new PrintStream(responseOutput, true, StandardCharsets.UTF_8);
+        Ui responseUi = new Ui(responseStream);
+
+        showAutomaticReminders(responseUi);
+
+        responseStream.flush();
+        return responseOutput.toString(StandardCharsets.UTF_8).replace("\t", "").strip();
+    }
+
     /** Executes a command for the supplied interface and reports expected errors. */
     private boolean executeCommand(String input, Ui commandUi) {
         try {
             Command command = parser.parse(input, tasks.size());
             assert command != null : "The parser must return a command for valid input.";
             command.execute(tasks, commandUi, storage);
+            if (!command.isExit() && !input.trim().equals("remind")) {
+                showAutomaticReminders(commandUi);
+            }
             return command.isExit();
         } catch (ShaiException e) {
             commandUi.showError(e);
             return false;
         }
+    }
+
+    /** Shows each newly due-soon reminder once and forgets removed reminders. */
+    private void showAutomaticReminders(Ui targetUi) {
+        LocalDateTime now = LocalDateTime.now(clock).truncatedTo(ChronoUnit.MINUTES);
+        List<Reminder> reminders = tasks.findRemindersDueSoon(now);
+        shownReminderTimes.keySet().removeIf(task -> reminders.stream()
+                .noneMatch(reminder -> reminder.getTask() == task));
+        List<Reminder> newReminders = reminders.stream()
+                .filter(reminder -> !reminder.getReminderTime().equals(
+                        shownReminderTimes.get(reminder.getTask())))
+                .toList();
+        targetUi.showAutomaticReminders(newReminders);
+        newReminders.forEach(reminder -> shownReminderTimes.put(reminder.getTask(), reminder.getReminderTime()));
     }
 
     /** Returns the introductory message shown to non-console clients. */

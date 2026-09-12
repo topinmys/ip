@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -86,5 +87,43 @@ class TaskListTest {
         TaskList taskList = new TaskList(List.of(new ToDo("buy milk")));
 
         assertEquals(0, taskList.find("book").size());
+    }
+
+    @Test
+    void findUpcomingReminders_filtersAndSortsPendingTimedTasks() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0);
+        Deadline first = new Deadline("first", LocalDateTime.of(2026, 9, 12, 12, 0));
+        Deadline outsideWindow = new Deadline("outside", LocalDateTime.of(2026, 9, 20, 12, 0));
+        Event second = new Event("second", LocalDateTime.of(2026, 9, 14, 10, 0),
+                LocalDateTime.of(2026, 9, 14, 11, 0));
+        Deadline disabled = new Deadline("disabled", LocalDateTime.of(2026, 9, 12, 12, 0));
+        disabled.setReminderMinutesBefore(Reminder.DISABLED);
+        Deadline completed = new Deadline("completed", LocalDateTime.of(2026, 9, 12, 12, 0));
+        completed.markAsDone();
+        TaskList taskList = new TaskList(List.of(first, outsideWindow, second, disabled, completed));
+
+        List<Reminder> reminders = taskList.findUpcomingReminders(now);
+
+        assertEquals(2, reminders.size());
+        assertEquals(0, reminders.get(0).getTaskIndex());
+        assertEquals(2, reminders.get(1).getTaskIndex());
+    }
+
+    @Test
+    void findRemindersDueSoon_includesMissedReminderForFutureTask() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0);
+        Deadline missedReminder = new Deadline("missed", now.plusHours(12));
+        Deadline atWindowEnd = new Deadline("at window end", now.plusDays(2));
+        Deadline outsideWindow = new Deadline("outside", now.plusDays(3));
+        Deadline overdue = new Deadline("overdue", now.minusMinutes(1));
+        Deadline completed = new Deadline("completed", now.plusHours(6));
+        completed.markAsDone();
+        TaskList taskList = new TaskList(List.of(missedReminder, atWindowEnd, outsideWindow, overdue, completed));
+
+        List<Reminder> reminders = taskList.findRemindersDueSoon(now);
+
+        assertEquals(2, reminders.size());
+        assertEquals(0, reminders.get(0).getTaskIndex());
+        assertEquals(1, reminders.get(1).getTaskIndex());
     }
 }
