@@ -26,7 +26,7 @@ class ShaiTest {
     void getGreeting_returnsGuiFriendlyIntroduction() {
         Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
 
-        assertEquals("Yo, what's good. I'm Shai.\nDrop the word, I gotchu.", shai.getGreeting());
+        assertEquals("Yo, I'm Shai. What's good, King? Ready to get things done?", shai.getGreeting());
     }
 
     @Test
@@ -37,11 +37,11 @@ class ShaiTest {
 
         String lineSeparator = System.lineSeparator();
         assertEquals(String.join(lineSeparator,
-                "Got it. I've added this task:",
+                "Added to the lineup, King.",
                 "  [T][ ] buy milk",
-                "Now you have 1 tasks in the list."), response);
+                "Roster updated, King. You now have 1 tasks on the board."), response);
         assertEquals(String.join(lineSeparator,
-                "Here are the tasks in your list:",
+                "Here's the current lineup, King.",
                 "1.[T][ ] buy milk"), shai.getResponse("list"));
     }
 
@@ -52,15 +52,36 @@ class ShaiTest {
         shai.getResponse("todo buy milk");
 
         assertEquals(String.join(System.lineSeparator(),
-                "Here are the matching tasks in your list:",
+                "Here's what I found on the scouting report, King.",
                 "1.[T][ ] read book"), shai.getResponse("find BOOK"));
+        assertEquals("Nothing showed up on the scouting report, King.", shai.getResponse("find cooking"));
+    }
+
+    @Test
+    void getResponse_markAndUnmark_returnsConfidentSuccessMessage() {
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
+        shai.getResponse("todo submit report");
+
+        assertEquals(String.join(System.lineSeparator(),
+                "That play worked perfectly, King.",
+                "  [T][X] submit report"), shai.getResponse("mark 1"));
+        assertEquals(String.join(System.lineSeparator(),
+                "That play worked perfectly, King.",
+                "  [T][ ] submit report"), shai.getResponse("unmark 1"));
+    }
+
+    @Test
+    void getResponse_bye_returnsKingGoodbye() {
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
+
+        assertEquals("Until next time, King. Keep winning.", shai.getResponse("bye"));
     }
 
     @Test
     void getResponse_invalidCommand_returnsUserFriendlyError() {
         Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
 
-        assertEquals("Ayy, I don't know that command yet.", shai.getResponse("unknown"));
+        assertEquals("Turnover. Check your command, King.", shai.getResponse("unknown"));
         assertTrue(shai.wasLastResponseAnError());
 
         shai.getResponse("list");
@@ -75,7 +96,7 @@ class ShaiTest {
         shai.getResponse("event team meeting /from 2026-09-18 1400 /to 2026-09-18 1600");
 
         assertEquals(String.join(System.lineSeparator(),
-                "Here are your upcoming reminders:",
+                "Here's the reminder lineup, King.",
                 "1.[D][ ] submit report (by: Sep 15 2026, 5:00 PM) (reminder: Sep 14 2026, 5:00 PM)",
                 "2.[E][ ] team meeting (from: Sep 18 2026, 2:00 PM to: Sep 18 2026, 4:00 PM) "
                         + "(reminder: Sep 17 2026, 2:00 PM)"), shai.getResponse("remind"));
@@ -89,15 +110,14 @@ class ShaiTest {
         shai.getResponse("deadline submit report /by 2026-09-15 1700");
 
         assertEquals(String.join(System.lineSeparator(),
-                "Reminder updated for task 1:",
-                "  [D][ ] submit report (by: Sep 15 2026, 5:00 PM)",
-                "  I'll remind you at Sep 15 2026, 2:00 PM."),
+                "Locked in. I'll remind you at Sep 15 2026, 2:00 PM, King.",
+                "  [D][ ] submit report (by: Sep 15 2026, 5:00 PM)"),
                 shai.getResponse("remind 1 /before 3h"));
         assertEquals(String.join(System.lineSeparator(),
-                "Reminder disabled for task 1:",
+                "That reminder's been benched, King.",
                 "  [D][ ] submit report (by: Sep 15 2026, 5:00 PM)"),
                 shai.getResponse("remind 1 /off"));
-        assertEquals("No reminders on the board - stay ahead of the game!", shai.getResponse("remind"));
+        assertEquals("No reminders on the board. Stay ready, King.", shai.getResponse("remind"));
     }
 
     @Test
@@ -111,7 +131,7 @@ class ShaiTest {
         Shai shai = new Shai(taskFile.toString(), clock);
 
         assertEquals(String.join(System.lineSeparator(),
-                "Reminder alert:",
+                "Reminder alert, King. Time to lock in.",
                 "1.[D][ ] submit report (by: Sep 12 2026, 12:00 PM) "
                         + "(reminder: Sep 11 2026, 12:00 PM)"), shai.getStartupReminderResponse());
         assertEquals("", shai.getStartupReminderResponse());
@@ -125,14 +145,14 @@ class ShaiTest {
         String firstResponse = shai.getResponse("deadline submit report /by 2026-09-12 1200");
 
         assertEquals(String.join(System.lineSeparator(),
-                "Got it. I've added this task:",
+                "Added to the lineup, King.",
                 "  [D][ ] submit report (by: Sep 12 2026, 12:00 PM)",
-                "Now you have 1 tasks in the list.",
-                "Reminder alert:",
+                "Roster updated, King. You now have 1 tasks on the board.",
+                "Reminder alert, King. Time to lock in.",
                 "1.[D][ ] submit report (by: Sep 12 2026, 12:00 PM) "
                         + "(reminder: Sep 11 2026, 12:00 PM)"), firstResponse);
         assertEquals(String.join(System.lineSeparator(),
-                "Here are the tasks in your list:",
+                "Here's the current lineup, King.",
                 "1.[D][ ] submit report (by: Sep 12 2026, 12:00 PM)"), shai.getResponse("list"));
     }
 }

@@ -1,5 +1,6 @@
 package shai.gui;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -11,6 +12,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import shai.Shai;
 
 /** Controller for the main Shai GUI window. */
@@ -81,7 +83,9 @@ public class MainWindow extends AnchorPane {
 
         if (input.trim().equals("bye")) {
             Stage stage = (Stage) userInput.getScene().getWindow();
-            stage.close();
+            PauseTransition goodbyeDelay = new PauseTransition(Duration.seconds(2));
+            goodbyeDelay.setOnFinished(event -> stage.close());
+            goodbyeDelay.play();
         }
     }
 }

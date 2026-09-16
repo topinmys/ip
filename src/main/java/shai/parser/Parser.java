@@ -88,7 +88,7 @@ public class Parser {
         } else if (isCommand(command, REMIND_COMMAND)) {
             return parseReminder(command, taskCount);
         }
-        throw new ShaiException("Ayy, I don't know that command yet.");
+        throw new ShaiException("Turnover. Check your command, King.");
     }
 
     /** Parses a find command and extracts its keyword. */
@@ -165,24 +165,21 @@ public class Parser {
         }
 
         String duration = action.substring(BEFORE_MARKER.length()).trim();
-        requireNonEmpty(duration, "Please provide a reminder duration after " + BEFORE_MARKER
-                + ". Try: remind 1 /before 2h.");
+        requireNonEmpty(duration, "That reminder play needs a duration, King. Try: remind 1 /before 2h.");
         return new ReminderCommand(taskIndex, parseReminderMinutes(duration), clock);
     }
 
     /** Parses a duration such as {@code 30m}, {@code 2h}, or {@code 1d}. */
     private static long parseReminderMinutes(String value) throws ShaiException {
         if (!value.matches("\\d+[mhd]")) {
-            throw new ShaiException("Reminder duration must be a non-negative number followed by "
-                    + "m, h, or d, for example 30m or 1d.");
+            throw new ShaiException("That reminder duration is out of bounds, King. Use 30m, 1h, or 1d.");
         }
 
         long amount;
         try {
             amount = Long.parseLong(value.substring(0, value.length() - 1));
         } catch (NumberFormatException e) {
-            throw new ShaiException("Reminder duration must be a non-negative number followed by "
-                    + "m, h, or d, for example 30m or 1d.");
+            throw new ShaiException("That reminder duration is out of bounds, King. Use 30m, 1h, or 1d.");
         }
 
         char unit = value.charAt(value.length() - 1);
@@ -199,14 +196,14 @@ public class Parser {
             }
             return minutes;
         } catch (ArithmeticException e) {
-            throw new ShaiException("Reminder duration is too large.");
+            throw new ShaiException("That reminder duration is too large, King.");
         }
     }
 
     /** Returns the standard error for an incomplete reminder command. */
     private static ShaiException invalidReminderSyntax() {
-        return new ShaiException("A reminder command must be: remind; remind <task number> "
-                + "/before <duration>; or remind <task number> /off.");
+        return new ShaiException("Call the reminder play like this: remind; remind <task number> "
+                + "/before <duration>; or remind <task number> /off, King.");
     }
 
     /** Parses a task date and converts parser errors into a user-friendly command error. */

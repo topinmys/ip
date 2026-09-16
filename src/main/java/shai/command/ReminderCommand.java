@@ -66,7 +66,7 @@ public class ReminderCommand extends Command {
 
         Task task = tasks.get(taskIndex);
         if (!(task instanceof Deadline) && !(task instanceof Event)) {
-            throw new ShaiException("Only deadlines and events can have reminders.");
+            throw new ShaiException("That reminder play isn't available for this task, King.");
         }
 
         if (isDisable) {
@@ -78,7 +78,7 @@ public class ReminderCommand extends Command {
 
         LocalDateTime reminderTime = getTargetTime(task).minusMinutes(reminderMinutesBefore);
         if (reminderTime.isBefore(currentTime())) {
-            throw new ShaiException("The reminder time must not be in the past.");
+            throw new ShaiException("That reminder time is already in the past, King.");
         }
         setReminderMinutesBefore(task, reminderMinutesBefore);
         ui.showReminderUpdated(taskIndex + 1, task, reminderTime);

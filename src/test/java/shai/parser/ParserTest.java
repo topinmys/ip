@@ -110,20 +110,19 @@ class ParserTest {
     void parse_invalidCommands_throwsUsefulErrors() {
         Parser parser = new Parser();
 
-        assertParseError(parser, "blah", 0, "Ayy, I don't know that command yet.");
+        assertParseError(parser, "blah", 0, "Turnover. Check your command, King.");
         assertParseError(parser, "find", 0, "Please provide a keyword after find.");
         assertParseError(parser, "todo", 0, "Hold up - I need a description for that todo.");
         assertParseError(parser, "mark 2", 1, "That task number is not in your list yet.");
         assertParseError(parser, "deadline report /by 2019-02-30", 0,
                 "Invalid date/time. Use yyyy-MM-dd HHmm, for example 2019-12-02 1800.");
         assertParseError(parser, "remind 1", 1,
-                "A reminder command must be: remind; remind <task number> /before <duration>; or "
-                        + "remind <task number> /off.");
+                "Call the reminder play like this: remind; remind <task number> /before <duration>; or "
+                        + "remind <task number> /off, King.");
         assertParseError(parser, "remind 1 /before", 1,
-                "Please provide a reminder duration after /before. Try: remind 1 /before 2h.");
+                "That reminder play needs a duration, King. Try: remind 1 /before 2h.");
         assertParseError(parser, "remind 1 /before later", 1,
-                "Reminder duration must be a non-negative number followed by m, h, or d, for example "
-                        + "30m or 1d.");
+                "That reminder duration is out of bounds, King. Use 30m, 1h, or 1d.");
         assertParseError(parser,
                 "event team meeting /from 2019-12-01 1600 /to 2019-12-01 1400", 0,
                 "An event must end after it starts.");

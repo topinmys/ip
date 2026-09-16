@@ -1,17 +1,17 @@
 .label {
-    -fx-background-color: rgba(24, 52, 79, 0.96);
-    -fx-text-fill: #e0f2fe;
-    -fx-font: 15px "Arial";
+    -fx-background-color: rgba(30, 64, 175, 0.96);
+    -fx-text-fill: #eff6ff;
+    -fx-font: 15px "Trebuchet MS";
     -fx-background-radius: 16px;
     -fx-border-radius: 16px;
-    -fx-border-color: rgba(96, 165, 250, 0.38);
+    -fx-border-color: #38bdf8;
     -fx-padding: 7px 12px;
 }
 
 .reply-label {
-    -fx-background-color: rgba(248, 250, 252, 0.96);
-    -fx-text-fill: #0f172a;
-    -fx-border-color: #e2e8f0;
+    -fx-background-color: rgba(7, 26, 43, 0.96);
+    -fx-text-fill: #f8fafc;
+    -fx-border-color: #f97316;
 }
 
 .error-label {

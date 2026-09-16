@@ -20,6 +20,7 @@ import shai.task.TaskList;
  */
 public class Ui {
     private static final String LINE = "\t____________________________________________________________";
+    private static final long GOODBYE_DELAY_MILLIS = 2000;
     /** Destination for user-facing messages. */
     private final PrintStream output;
 
@@ -72,7 +73,7 @@ public class Ui {
 
     /** Returns the short greeting used by graphical clients. */
     public String getGreeting() {
-        return "Yo, what's good. I'm Shai.\nDrop the word, I gotchu.";
+        return "Yo, I'm Shai. What's good, King? Ready to get things done?";
     }
 
     /** Prints the separator before processing a command. */
@@ -97,28 +98,45 @@ public class Ui {
 
     /** Prints the response for the {@code bye} command. */
     public void showGoodbye() {
-        output.println("\tSay less. Stay blessed, peace!");
+        output.println("\tUntil next time, King. Keep winning.");
+    }
+
+    /** Waits briefly so the user can read the goodbye message before Shai exits. */
+    public void waitBeforeExit() {
+        try {
+            Thread.sleep(GOODBYE_DELAY_MILLIS);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     /** Prints every task currently stored in the task list. */
     public void showTasks(TaskList tasks) {
-        showTaskList(tasks, "\tHere are the tasks in your list:");
+        if (tasks.size() == 0) {
+            output.println("\tThe lineup is empty, King.");
+            return;
+        }
+        showTaskList(tasks, "\tHere's the current lineup, King.");
     }
 
     /** Prints every task whose description contains the requested keyword. */
     public void showMatchingTasks(TaskList tasks) {
-        showTaskList(tasks, "\tHere are the matching tasks in your list:");
+        if (tasks.size() == 0) {
+            output.println("\tNothing showed up on the scouting report, King.");
+            return;
+        }
+        showTaskList(tasks, "\tHere's what I found on the scouting report, King.");
     }
 
     /** Prints reminders scheduled within the supported upcoming window. */
     public void showReminders(TaskList tasks, LocalDateTime now) {
         List<Reminder> reminders = tasks.findUpcomingReminders(now);
         if (reminders.isEmpty()) {
-            output.println("\tNo reminders on the board - stay ahead of the game!");
+            output.println("\tNo reminders on the board. Stay ready, King.");
             return;
         }
 
-        output.println("\tHere are your upcoming reminders:");
+        output.println("\tHere's the reminder lineup, King.");
         for (Reminder reminder : reminders) {
             output.println("\t" + (reminder.getTaskIndex() + 1) + "." + reminder.getTask()
                     + " (reminder: " + DateTimeParser.formatForDisplay(reminder.getReminderTime()) + ")");
@@ -131,7 +149,7 @@ public class Ui {
             return;
         }
 
-        output.println("\tReminder alert:");
+        output.println("\tReminder alert, King. Time to lock in.");
         for (Reminder reminder : reminders) {
             output.println("\t" + (reminder.getTaskIndex() + 1) + "." + reminder.getTask()
                     + " (reminder: " + DateTimeParser.formatForDisplay(reminder.getReminderTime()) + ")");
@@ -140,14 +158,14 @@ public class Ui {
 
     /** Prints the response for updating a reminder. */
     public void showReminderUpdated(int taskNumber, Task task, LocalDateTime reminderTime) {
-        output.println("\tReminder updated for task " + taskNumber + ":");
+        output.println("\tLocked in. I'll remind you at "
+                + DateTimeParser.formatForDisplay(reminderTime) + ", King.");
         output.println("\t  " + task);
-        output.println("\t  I'll remind you at " + DateTimeParser.formatForDisplay(reminderTime) + ".");
     }
 
     /** Prints the response for disabling a reminder. */
     public void showReminderDisabled(int taskNumber, Task task) {
-        output.println("\tReminder disabled for task " + taskNumber + ":");
+        output.println("\tThat reminder's been benched, King.");
         output.println("\t  " + task);
     }
 
@@ -161,27 +179,29 @@ public class Ui {
 
     /** Prints the response for marking a task as done. */
     public void showMarked(Task task) {
-        output.println("\tNice! I've marked this task as done:");
+        output.println("\tThat play worked perfectly, King.");
         output.println("\t  " + task);
     }
 
     /** Prints the response for marking a task as not done. */
     public void showUnmarked(Task task) {
-        output.println("\tOK, I've marked this task as not done yet:");
+        output.println("\tThat play worked perfectly, King.");
         output.println("\t  " + task);
     }
 
     /** Prints the response for deleting a task. */
     public void showDeleted(Task task, int remainingTaskCount) {
-        output.println("\tNoted. I've removed this task:");
+        output.println("\tThat one's been sent to the bench.");
         output.println("\t  " + task);
-        output.println("\tNow you have " + remainingTaskCount + " tasks in the list.");
+        output.println("\tRoster updated, King. You now have " + remainingTaskCount
+                + " tasks on the board.");
     }
 
     /** Prints the response for adding a task. */
     public void showAdded(Task task, int taskCount) {
-        output.println("\tGot it. I've added this task:");
+        output.println("\tAdded to the lineup, King.");
         output.println("\t  " + task);
-        output.println("\tNow you have " + taskCount + " tasks in the list.");
+        output.println("\tRoster updated, King. You now have " + taskCount
+                + " tasks on the board.");
     }
 }
