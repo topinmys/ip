@@ -84,6 +84,9 @@ public class Shai {
             } finally {
                 ui.showCommandEnd();
             }
+            if (isExit) {
+                ui.waitBeforeExit();
+            }
         }
     }
 

@@ -109,14 +109,14 @@ class StorageTest {
 
         ShaiException exception = assertThrows(ShaiException.class, () -> new Storage(file.toString()).loadTasks());
 
-        assertEquals("I couldn't load your tasks from disk (line 1).", exception.getMessage());
+        assertEquals("I couldn't load your lineup, King. The play on line 1 is invalid.", exception.getMessage());
     }
 
     @Test
     void saveTasks_nullTaskList_throwsUsefulError() {
         ShaiException exception = assertThrows(ShaiException.class, () -> storage().saveTasks(null));
 
-        assertEquals("I couldn't save your tasks to disk.", exception.getMessage());
+        assertEquals("I couldn't save your lineup, King. Check the task file.", exception.getMessage());
     }
 
     private Storage storage() {

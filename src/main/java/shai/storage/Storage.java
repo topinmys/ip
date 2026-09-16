@@ -51,7 +51,7 @@ public class Storage {
      */
     public void saveTasks(TaskList tasks) throws ShaiException {
         if (tasks == null) {
-            throw new ShaiException("I couldn't save your tasks to disk.");
+            throw new ShaiException("I couldn't save your lineup, King. Check the task file.");
         }
 
         Path temporaryFile = taskFile.resolveSibling(taskFile.getFileName() + ".tmp");
@@ -66,7 +66,7 @@ public class Storage {
             replaceTaskFile(temporaryFile);
         } catch (IOException | SecurityException | IllegalArgumentException e) {
             deleteTemporaryFile(temporaryFile);
-            throw new ShaiException("I couldn't save your tasks to disk.");
+            throw new ShaiException("I couldn't save your lineup, King. Check the task file.");
         }
     }
 
@@ -92,7 +92,7 @@ public class Storage {
             }
             return tasks;
         } catch (IOException | SecurityException e) {
-            throw new ShaiException("I couldn't load your tasks from disk.");
+            throw new ShaiException("I couldn't load your lineup, King. Check the task file.");
         }
     }
 
@@ -291,6 +291,7 @@ public class Storage {
 
     /** Creates a consistent error for a malformed persisted line. */
     private static ShaiException invalidData(int lineNumber) {
-        return new ShaiException("I couldn't load your tasks from disk (line " + lineNumber + ").");
+        return new ShaiException("I couldn't load your lineup, King. The play on line "
+                + lineNumber + " is invalid.");
     }
 }

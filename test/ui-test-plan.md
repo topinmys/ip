@@ -27,7 +27,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 ## Test Case 1: Exit immediately
 
-- Aim: Verify that Shai displays its greeting and exits cleanly when the user enters `bye`.
+- Aim: Verify that Shai displays its greeting and goodbye message before exiting when the user enters `bye`.
 - Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
@@ -44,12 +44,11 @@ This plan describes black-box tests for the `Shai` command-line interface.
   	 \___ \| '_ \ / _` | |
   	  ___) | | | | (_| | |
   	 |____/|_| |_|\__,_|_|
-  	Yo, what's good. I'm Shai.
-  	Drop the word, I gotchu.
+  	Yo, I'm Shai. What's good, King? Ready to get things done?
   	____________________________________________________________
 
   	____________________________________________________________
-  	Say less. Stay blessed, peace!
+  	Until next time, King. Keep winning.
   	____________________________________________________________
 
   ```
@@ -75,23 +74,22 @@ This plan describes black-box tests for the `Shai` command-line interface.
   	 \___ \| '_ \ / _` | |
   	  ___) | | | | (_| | |
   	 |____/|_| |_|\__,_|_|
-  	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+  	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] buy milk
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][ ] buy milk
 	____________________________________________________________
 
   	____________________________________________________________
-  	Say less. Stay blessed, peace!
+  	Until next time, King. Keep winning.
   	____________________________________________________________
 
   ```
@@ -119,33 +117,32 @@ This plan describes black-box tests for the `Shai` command-line interface.
   	 \___ \| '_ \ / _` | |
   	  ___) | | | | (_| | |
   	 |____/|_| |_|\__,_|_|
-  	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+  	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] submit report
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
   	____________________________________________________________
-  	Nice! I've marked this task as done:
+  	That play worked perfectly, King.
 	  [T][X] submit report
   	____________________________________________________________
 
   	____________________________________________________________
-  	OK, I've marked this task as not done yet:
+  	That play worked perfectly, King.
 	  [T][ ] submit report
   	____________________________________________________________
 
   	____________________________________________________________
-  	Here are the tasks in your list:
+  	Here's the current lineup, King.
 	1.[T][ ] submit report
   	____________________________________________________________
 
   	____________________________________________________________
-  	Say less. Stay blessed, peace!
+  	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -170,18 +167,17 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] return book (by: Dec 01 2019)
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -206,18 +202,17 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [E][ ] project meeting (from: Oct 15 2019, 2:00 PM to: Oct 15 2019, 4:00 PM)
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -242,8 +237,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
@@ -251,7 +245,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -282,8 +276,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
@@ -307,7 +300,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Ayy, I don't know that command yet.
+	Turnover. Check your command, King.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -315,7 +308,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -344,42 +337,41 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] alpha
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] beta
-	Now you have 2 tasks in the list.
+	Roster updated, King. You now have 2 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] gamma
-	Now you have 3 tasks in the list.
+	Roster updated, King. You now have 3 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Noted. I've removed this task:
+	That one's been sent to the bench.
 	  [T][ ] beta
-	Now you have 2 tasks in the list.
+	Roster updated, King. You now have 2 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][ ] alpha
 	2.[T][ ] gamma
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -408,14 +400,13 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] alpha
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -431,12 +422,12 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][ ] alpha
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -467,14 +458,13 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] alpha
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -482,9 +472,9 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] beta (by: Dec 01 2019)
-	Now you have 2 tasks in the list.
+	Roster updated, King. You now have 2 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -492,9 +482,9 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [E][ ] planning (from: Dec 01 2019, 2:00 PM to: Dec 01 2019, 3:00 PM)
-	Now you have 3 tasks in the list.
+	Roster updated, King. You now have 3 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -502,14 +492,14 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][ ] alpha
 	2.[D][ ] beta (by: Dec 01 2019)
 	3.[E][ ] planning (from: Dec 01 2019, 2:00 PM to: Dec 01 2019, 3:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -541,18 +531,17 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] alpha
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Nice! I've marked this task as done:
+	That play worked perfectly, King.
 	  [T][X] alpha
 	____________________________________________________________
 
@@ -561,7 +550,7 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][X] alpha
 	____________________________________________________________
 
@@ -570,22 +559,22 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][X] alpha
 	____________________________________________________________
 
 	____________________________________________________________
-	Noted. I've removed this task:
+	That one's been sent to the bench.
 	  [T][X] alpha
-	Now you have 0 tasks in the list.
+	Roster updated, King. You now have 0 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	The lineup is empty, King.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -614,42 +603,41 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] buy milk
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] return book (by: Dec 02 2019, 6:00 PM)
-	Now you have 2 tasks in the list.
+	Roster updated, King. You now have 2 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [E][ ] project meeting (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
-	Now you have 3 tasks in the list.
+	Roster updated, King. You now have 3 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Nice! I've marked this task as done:
+	That play worked perfectly, King.
 	  [T][X] buy milk
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][X] buy milk
 	2.[D][ ] return book (by: Dec 02 2019, 6:00 PM)
 	3.[E][ ] project meeting (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -675,19 +663,18 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][X] buy milk
 	2.[D][ ] return book (by: Dec 02 2019, 6:00 PM)
 	3.[E][ ] project meeting (from: Dec 03 2019, 2:00 PM to: Dec 03 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -716,37 +703,36 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] review | draft \ backup \
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] submit | final (by: Dec 04 2019, 5:00 PM)
-	Now you have 2 tasks in the list.
+	Roster updated, King. You now have 2 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [E][ ] meeting | sync (from: Dec 04 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
-	Now you have 3 tasks in the list.
+	Roster updated, King. You now have 3 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][ ] review | draft \ backup \
 	2.[D][ ] submit | final (by: Dec 04 2019, 5:00 PM)
 	3.[E][ ] meeting | sync (from: Dec 04 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -771,19 +757,18 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[T][ ] review | draft \ backup \
 	2.[D][ ] submit | final (by: Dec 04 2019, 5:00 PM)
 	3.[E][ ] meeting | sync (from: Dec 04 2019, 2:00 PM to: Dec 04 2019, 4:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -802,23 +787,22 @@ This plan describes black-box tests for the `Shai` command-line interface.
 - Expected output:
 
   ```text
-	I couldn't load your tasks from disk (line 1).
+	I couldn't load your lineup, King. The play on line 1 is invalid.
 	____________________________________________________________
 	  ____  _           _
 	 / ___|| |__   __ _(_)
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	The lineup is empty, King.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -847,36 +831,35 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] read book
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] return book (by: Dec 01 2019)
-	Now you have 2 tasks in the list.
+	Roster updated, King. You now have 2 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] buy milk
-	Now you have 3 tasks in the list.
+	Roster updated, King. You now have 3 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the matching tasks in your list:
+	Here's what I found on the scouting report, King.
 	1.[T][ ] read book
 	2.[D][ ] return book (by: Dec 01 2019)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -903,33 +886,31 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Reminder updated for task 1:
-	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
-	  I'll remind you at Sep 15 2099, 2:00 PM.
-	____________________________________________________________
-
-	____________________________________________________________
-	Reminder disabled for task 1:
+	Locked in. I'll remind you at Sep 15 2099, 2:00 PM, King.
 	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	No reminders on the board - stay ahead of the game!
+	That reminder's been benched, King.
+	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	No reminders on the board. Stay ready, King.
+	____________________________________________________________
+
+	____________________________________________________________
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -958,34 +939,33 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [T][ ] buy milk
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Only deadlines and events can have reminders.
+	That reminder play isn't available for this task, King.
 	____________________________________________________________
 
 	____________________________________________________________
-	A reminder command must be: remind; remind <task number> /before <duration>; or remind <task number> /off.
+	Call the reminder play like this: remind; remind <task number> /before <duration>; or remind <task number> /off, King.
 	____________________________________________________________
 
 	____________________________________________________________
-	Please provide a reminder duration after /before. Try: remind 1 /before 2h.
+	That reminder play needs a duration, King. Try: remind 1 /before 2h.
 	____________________________________________________________
 
 	____________________________________________________________
-	Reminder duration must be a non-negative number followed by m, h, or d, for example 30m or 1d.
+	That reminder duration is out of bounds, King. Use 30m, 1h, or 1d.
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
@@ -1012,23 +992,62 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	 \___ \| '_ \ / _` | |
 	  ___) | | | | (_| | |
 	 |____/|_| |_|\__,_|_|
-	Yo, what's good. I'm Shai.
-	Drop the word, I gotchu.
+	Yo, I'm Shai. What's good, King? Ready to get things done?
 	____________________________________________________________
 
 	____________________________________________________________
-	Got it. I've added this task:
+	Added to the lineup, King.
 	  [D][ ] submit report (by: Sep 15 2099, 5:00 PM)
-	Now you have 1 tasks in the list.
+	Roster updated, King. You now have 1 tasks on the board.
 	____________________________________________________________
 
 	____________________________________________________________
-	Here are the tasks in your list:
+	Here's the current lineup, King.
 	1.[D][ ] submit report (by: Sep 15 2099, 5:00 PM)
 	____________________________________________________________
 
 	____________________________________________________________
-	Say less. Stay blessed, peace!
+	Until next time, King. Keep winning.
+	____________________________________________________________
+
+  ```
+
+## Test Case 21: Report when a search finds no tasks
+
+- Aim: Verify that `find` gives a personalized response when no task matches the keyword.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  todo read book
+  find cooking
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, I'm Shai. What's good, King? Ready to get things done?
+	____________________________________________________________
+
+	____________________________________________________________
+	Added to the lineup, King.
+	  [T][ ] read book
+	Roster updated, King. You now have 1 tasks on the board.
+	____________________________________________________________
+
+	____________________________________________________________
+	Nothing showed up on the scouting report, King.
+	____________________________________________________________
+
+	____________________________________________________________
+	Until next time, King. Keep winning.
 	____________________________________________________________
 
   ```
