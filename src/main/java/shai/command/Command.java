@@ -27,4 +27,9 @@ public abstract class Command {
     public boolean isExit() {
         return false;
     }
+
+    /** Returns whether this command needs to write the task file. */
+    public boolean requiresStorageWrite() {
+        return false;
+    }
 }

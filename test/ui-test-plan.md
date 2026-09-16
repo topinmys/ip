@@ -775,12 +775,13 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 ## Test Case 16: Recover from malformed task data
 
-- Aim: Verify that malformed persisted data reports an error and Shai continues with an empty task list instead of crashing.
+- Aim: Verify that malformed persisted data reports an error, prevents unsafe mutations, and does not get overwritten.
 - Command: `java -cp _temp\test-ui\classes shai.Shai`
 - Inputs:
 
   ```text
   list
+  todo replacement
   bye
   ```
 
@@ -799,6 +800,10 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	The lineup is empty, King.
+	____________________________________________________________
+
+	____________________________________________________________
+	I couldn't update your lineup because the task file could not be loaded. Fix the task file before making changes, King.
 	____________________________________________________________
 
 	____________________________________________________________
@@ -1044,6 +1049,39 @@ This plan describes black-box tests for the `Shai` command-line interface.
 
 	____________________________________________________________
 	Nothing showed up on the scouting report, King.
+	____________________________________________________________
+
+	____________________________________________________________
+	Until next time, King. Keep winning.
+	____________________________________________________________
+
+  ```
+
+## Test Case 22: Reject ambiguous command spacing
+
+- Aim: Verify that commands containing multiple spaces are rejected without changing the task list.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  todo  buy milk
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, I'm Shai. What's good, King? Ready to get things done?
+	____________________________________________________________
+
+	____________________________________________________________
+	Use a single space between command parameters, King.
 	____________________________________________________________
 
 	____________________________________________________________

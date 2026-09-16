@@ -6,6 +6,8 @@ import java.nio.file.AccessDeniedException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
@@ -38,9 +40,20 @@ public class Storage {
      * Creates storage backed by the specified file.
      *
      * @param filePath path to the task file
+     * @throws IllegalArgumentException if the path is blank or invalid
      */
     public Storage(String filePath) {
-        taskFile = Path.of(filePath);
+        if (filePath == null || filePath.isBlank()) {
+            throw new IllegalArgumentException("The task file path must not be blank.");
+        }
+        try {
+            taskFile = Path.of(filePath);
+        } catch (InvalidPathException exception) {
+            throw new IllegalArgumentException("The task file path is invalid.", exception);
+        }
+        if (taskFile.getFileName() == null) {
+            throw new IllegalArgumentException("The task file path must identify a file.");
+        }
     }
 
     /**
@@ -78,10 +91,6 @@ public class Storage {
      */
     public TaskList loadTasks() throws ShaiException {
         try {
-            if (!Files.exists(taskFile)) {
-                return new TaskList();
-            }
-
             TaskList tasks = new TaskList();
             List<String> lines = Files.readAllLines(taskFile, StandardCharsets.UTF_8);
             for (int i = 0; i < lines.size(); i++) {
@@ -91,6 +100,8 @@ public class Storage {
                 }
             }
             return tasks;
+        } catch (NoSuchFileException e) {
+            return new TaskList();
         } catch (IOException | SecurityException e) {
             throw new ShaiException("I couldn't load your lineup, King. Check the task file.");
         }
@@ -268,7 +279,7 @@ public class Storage {
                     field.append(unescapeCharacter(escaped));
                     i++;
                 } else {
-                    field.append(character);
+                    throw invalidData(lineNumber);
                 }
             } else if (character == '\\') {
                 throw invalidData(lineNumber);

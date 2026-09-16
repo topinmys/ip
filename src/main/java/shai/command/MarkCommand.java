@@ -21,8 +21,22 @@ public class MarkCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
         Task task = tasks.get(taskIndex);
+        boolean wasDone = task.isDone();
         task.markAsDone();
+        try {
+            storage.saveTasks(tasks);
+        } catch (ShaiException exception) {
+            if (!wasDone) {
+                task.unmark();
+            }
+            throw exception;
+        }
         ui.showMarked(task);
-        storage.saveTasks(tasks);
+    }
+
+    /** Returns whether marking this task requires a storage write. */
+    @Override
+    public boolean requiresStorageWrite() {
+        return true;
     }
 }

@@ -23,7 +23,7 @@ public class ReminderCommand extends Command {
 
     /** Creates a command that lists upcoming reminders. */
     public ReminderCommand(Clock clock) {
-        assert clock != null : "The reminder clock must not be null.";
+        requireClock(clock);
         taskIndex = -1;
         reminderMinutesBefore = Reminder.DISABLED;
         isList = true;
@@ -33,11 +33,12 @@ public class ReminderCommand extends Command {
 
     /** Creates a command that configures one task's reminder. */
     public ReminderCommand(int taskIndex, long reminderMinutesBefore, Clock clock) {
-        assert taskIndex >= 0 : "The reminder task index must not be negative.";
-        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
-                && reminderMinutesBefore != Reminder.DISABLED
-                : "The reminder duration must be valid and enabled.";
-        assert clock != null : "The reminder clock must not be null.";
+        requireTaskIndex(taskIndex);
+        if (!Reminder.isValidMinutesBefore(reminderMinutesBefore)
+                || reminderMinutesBefore == Reminder.DISABLED) {
+            throw new IllegalArgumentException("The reminder duration must be valid and enabled.");
+        }
+        requireClock(clock);
         this.taskIndex = taskIndex;
         this.reminderMinutesBefore = reminderMinutesBefore;
         isList = false;
@@ -47,8 +48,8 @@ public class ReminderCommand extends Command {
 
     /** Creates a command that disables one task's reminder. */
     public ReminderCommand(int taskIndex, Clock clock) {
-        assert taskIndex >= 0 : "The reminder task index must not be negative.";
-        assert clock != null : "The reminder clock must not be null.";
+        requireTaskIndex(taskIndex);
+        requireClock(clock);
         this.taskIndex = taskIndex;
         reminderMinutesBefore = Reminder.DISABLED;
         isList = false;
@@ -70,9 +71,15 @@ public class ReminderCommand extends Command {
         }
 
         if (isDisable) {
+            long previousReminderMinutesBefore = getReminderMinutesBefore(task);
             setReminderMinutesBefore(task, Reminder.DISABLED);
+            try {
+                storage.saveTasks(tasks);
+            } catch (ShaiException exception) {
+                setReminderMinutesBefore(task, previousReminderMinutesBefore);
+                throw exception;
+            }
             ui.showReminderDisabled(taskIndex + 1, task);
-            storage.saveTasks(tasks);
             return;
         }
 
@@ -80,9 +87,21 @@ public class ReminderCommand extends Command {
         if (reminderTime.isBefore(currentTime())) {
             throw new ShaiException("That reminder time is already in the past, King.");
         }
+        long previousReminderMinutesBefore = getReminderMinutesBefore(task);
         setReminderMinutesBefore(task, reminderMinutesBefore);
+        try {
+            storage.saveTasks(tasks);
+        } catch (ShaiException exception) {
+            setReminderMinutesBefore(task, previousReminderMinutesBefore);
+            throw exception;
+        }
         ui.showReminderUpdated(taskIndex + 1, task, reminderTime);
-        storage.saveTasks(tasks);
+    }
+
+    /** Returns whether configuring or disabling this reminder writes storage. */
+    @Override
+    public boolean requiresStorageWrite() {
+        return !isList;
     }
 
     /** Returns the current clock value rounded to the supported minute precision. */
@@ -105,6 +124,28 @@ public class ReminderCommand extends Command {
         } else {
             Event event = (Event) task;
             event.setReminderMinutesBefore(minutesBefore);
+        }
+    }
+
+    /** Returns the current reminder lead time on a supported task. */
+    private static long getReminderMinutesBefore(Task task) {
+        if (task instanceof Deadline deadline) {
+            return deadline.getReminderMinutesBefore();
+        }
+        return ((Event) task).getReminderMinutesBefore();
+    }
+
+    /** Validates a task index supplied to a reminder command constructor. */
+    private static void requireTaskIndex(int taskIndex) {
+        if (taskIndex < 0) {
+            throw new IllegalArgumentException("The reminder task index must not be negative.");
+        }
+    }
+
+    /** Validates the clock supplied to a reminder command constructor. */
+    private static void requireClock(Clock clock) {
+        if (clock == null) {
+            throw new IllegalArgumentException("The reminder clock must not be null.");
         }
     }
 }

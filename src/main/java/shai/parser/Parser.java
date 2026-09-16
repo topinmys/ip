@@ -51,7 +51,9 @@ public class Parser {
 
     /** Creates a parser that uses the supplied clock for reminder validation. */
     public Parser(Clock clock) {
-        assert clock != null : "The parser clock must not be null.";
+        if (clock == null) {
+            throw new IllegalArgumentException("The parser clock must not be null.");
+        }
         this.clock = clock;
     }
 
@@ -62,11 +64,20 @@ public class Parser {
      * @param taskCount current number of tasks, used to validate task numbers
      * @return an executable command
      * @throws ShaiException if the command is unknown or malformed
+     * @throws IllegalArgumentException if the task count is negative
      */
     public Command parse(String input, int taskCount) throws ShaiException {
-        assert input != null : "The command input must not be null.";
-        assert taskCount >= 0 : "The task count must not be negative.";
+        if (input == null) {
+            throw new ShaiException("Please enter a command, King.");
+        }
+        if (taskCount < 0) {
+            throw new IllegalArgumentException("The task count must not be negative.");
+        }
         String command = input.trim();
+        validateSpacing(command);
+        if (command.isEmpty()) {
+            throw new ShaiException("Please enter a command, King.");
+        }
         if (command.equals(BYE_COMMAND)) {
             return new ExitCommand();
         } else if (command.equals(LIST_COMMAND)) {
@@ -107,10 +118,13 @@ public class Parser {
 
     /** Parses a Deadline command and extracts its description and due date. */
     private static Command parseDeadline(String command) throws ShaiException {
-        int indexBy = command.indexOf(BY_MARKER);
+        int indexBy = findMarker(command, BY_MARKER, 0);
         if (indexBy < 0) {
             throw new ShaiException("A deadline needs a date after " + BY_MARKER + ". Try: "
                     + DEADLINE_COMMAND + " submit report " + BY_MARKER + " 2019-12-01.");
+        }
+        if (findMarker(command, BY_MARKER, indexBy + BY_MARKER.length()) >= 0) {
+            throw new ShaiException("A deadline must contain exactly one " + BY_MARKER + " parameter.");
         }
         String description = command.substring(DEADLINE_COMMAND.length(), indexBy).trim();
         String byText = command.substring(indexBy + BY_MARKER.length()).trim();
@@ -121,12 +135,17 @@ public class Parser {
 
     /** Parses an Event command and extracts its description and time range. */
     private static Command parseEvent(String command) throws ShaiException {
-        int indexFrom = command.indexOf(FROM_MARKER);
-        int indexTo = command.indexOf(TO_MARKER);
+        int indexFrom = findMarker(command, FROM_MARKER, 0);
+        int indexTo = findMarker(command, TO_MARKER, 0);
         if (indexFrom < 0 || indexTo < 0 || indexFrom >= indexTo) {
             throw new ShaiException("An event needs " + FROM_MARKER + " and " + TO_MARKER
                     + " times. Try: " + EVENT_COMMAND + " meeting " + FROM_MARKER
                     + " 2019-12-01 1400 " + TO_MARKER + " 2019-12-01 1600.");
+        }
+        if (findMarker(command, FROM_MARKER, indexFrom + FROM_MARKER.length()) >= 0
+                || findMarker(command, TO_MARKER, indexTo + TO_MARKER.length()) >= 0) {
+            throw new ShaiException("An event must contain exactly one " + FROM_MARKER
+                    + " and one " + TO_MARKER + " parameter.");
         }
         String description = command.substring(EVENT_COMMAND.length(), indexFrom).trim();
         String fromText = command.substring(indexFrom + FROM_MARKER.length(), indexTo).trim();
@@ -160,7 +179,10 @@ public class Parser {
         if (action.equals(OFF_MARKER)) {
             return new ReminderCommand(taskIndex, clock);
         }
-        if (!action.startsWith(BEFORE_MARKER)) {
+        if (action.equals(BEFORE_MARKER)) {
+            requireNonEmpty("", "That reminder play needs a duration, King. Try: remind 1 /before 2h.");
+        }
+        if (!action.startsWith(BEFORE_MARKER + " ")) {
             throw invalidReminderSyntax();
         }
 
@@ -220,9 +242,32 @@ public class Parser {
         return input.equals(command) || input.startsWith(command + " ");
     }
 
+    /** Rejects ambiguous command spacing before command-specific parsing. */
+    private static void validateSpacing(String command) throws ShaiException {
+        if (command.matches(".*\\s{2,}.*") || command.indexOf('\t') >= 0) {
+            throw new ShaiException("Use a single space between command parameters, King.");
+        }
+    }
+
+    /** Finds a marker that is separated from surrounding text by whitespace. */
+    private static int findMarker(String command, String marker, int fromIndex) {
+        int index = command.indexOf(marker, fromIndex);
+        while (index >= 0) {
+            boolean hasLeadingBoundary = index > 0 && Character.isWhitespace(command.charAt(index - 1));
+            int markerEnd = index + marker.length();
+            boolean hasTrailingBoundary = markerEnd == command.length()
+                    || Character.isWhitespace(command.charAt(markerEnd));
+            if (hasLeadingBoundary && hasTrailingBoundary) {
+                return index;
+            }
+            index = command.indexOf(marker, markerEnd);
+        }
+        return -1;
+    }
+
     /** Ensures that a required command field contains useful text. */
     private static void requireNonEmpty(String value, String message) throws ShaiException {
-        if (value.trim().isEmpty()) {
+        if (value == null || value.isBlank()) {
             throw new ShaiException(message);
         }
     }
@@ -242,6 +287,9 @@ public class Parser {
         requireNonEmpty(argument, "Please provide a task number after " + commandName + ".");
 
         final int oneBasedIndex;
+        if (!argument.matches("\\d+")) {
+            throw new ShaiException("The task number after " + commandName + " must be a whole number.");
+        }
         try {
             oneBasedIndex = Integer.parseInt(argument);
         } catch (NumberFormatException e) {

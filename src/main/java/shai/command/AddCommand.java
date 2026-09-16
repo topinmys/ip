@@ -21,7 +21,18 @@ public class AddCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
         tasks.add(task);
+        try {
+            storage.saveTasks(tasks);
+        } catch (ShaiException exception) {
+            tasks.remove(tasks.size() - 1);
+            throw exception;
+        }
         ui.showAdded(task, tasks.size());
-        storage.saveTasks(tasks);
+    }
+
+    /** Returns whether adding this task requires a storage write. */
+    @Override
+    public boolean requiresStorageWrite() {
+        return true;
     }
 }

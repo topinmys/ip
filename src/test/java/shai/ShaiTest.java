@@ -2,8 +2,11 @@ package shai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
@@ -13,9 +16,19 @@ import java.time.ZoneId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import shai.command.AddCommand;
+import shai.command.DeleteCommand;
+import shai.command.MarkCommand;
+import shai.command.ReminderCommand;
+import shai.command.UnmarkCommand;
+import shai.exception.ShaiException;
 import shai.storage.Storage;
 import shai.task.Deadline;
+import shai.task.Reminder;
+import shai.task.Task;
 import shai.task.TaskList;
+import shai.task.ToDo;
+import shai.ui.Ui;
 
 /** Tests command processing through the programmatic interface used by the GUI. */
 class ShaiTest {
@@ -89,6 +102,81 @@ class ShaiTest {
     }
 
     @Test
+    void getResponse_nullInput_returnsUserFriendlyError() {
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
+
+        assertEquals("Please enter a command, King.", shai.getResponse(null));
+        assertTrue(shai.wasLastResponseAnError());
+    }
+
+    @Test
+    void getResponse_afterLoadFailure_doesNotOverwriteTaskFile() throws Exception {
+        Path taskFile = temporaryDirectory.resolve("tasks.txt");
+        String malformedData = "X | 0 | invalid task\n";
+        Files.writeString(taskFile, malformedData);
+        Shai shai = new Shai(taskFile.toString());
+
+        String response = shai.getResponse("todo replacement");
+
+        assertEquals("I couldn't update your lineup because the task file could not be loaded. "
+                + "Fix the task file before making changes, King.", response);
+        assertEquals(malformedData, Files.readString(taskFile));
+    }
+
+    @Test
+    void addCommand_saveFails_rollsBackTask() {
+        TaskList tasks = new TaskList();
+        AddCommand command = new AddCommand(new ToDo("buy milk"));
+
+        assertThrows(ShaiException.class, () -> command.execute(tasks, new Ui(), failingStorage()));
+
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    void deleteCommand_saveFails_restoresTask() {
+        Task task = new ToDo("buy milk");
+        TaskList tasks = new TaskList();
+        tasks.add(task);
+
+        assertThrows(ShaiException.class,
+                () -> new DeleteCommand(0).execute(tasks, new Ui(), failingStorage()));
+
+        assertEquals(1, tasks.size());
+        assertSame(task, tasks.get(0));
+    }
+
+    @Test
+    void markAndUnmarkCommands_saveFails_restorePreviousStatus() {
+        Task task = new ToDo("buy milk");
+        TaskList tasks = new TaskList();
+        tasks.add(task);
+
+        assertThrows(ShaiException.class,
+                () -> new MarkCommand(0).execute(tasks, new Ui(), failingStorage()));
+        assertFalse(task.isDone());
+
+        task.markAsDone();
+        assertThrows(ShaiException.class,
+                () -> new UnmarkCommand(0).execute(tasks, new Ui(), failingStorage()));
+        assertTrue(task.isDone());
+    }
+
+    @Test
+    void reminderCommand_saveFails_restoresPreviousReminder() {
+        Deadline deadline = new Deadline("submit report", LocalDateTime.of(2099, 9, 15, 17, 0));
+        TaskList tasks = new TaskList();
+        tasks.add(deadline);
+
+        assertThrows(ShaiException.class,
+                () -> new ReminderCommand(0, 180,
+                        Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC")))
+                                .execute(tasks, new Ui(), failingStorage()));
+
+        assertEquals(Reminder.DEFAULT_MINUTES_BEFORE, deadline.getReminderMinutesBefore());
+    }
+
+    @Test
     void getResponse_remind_listsUpcomingRemindersChronologically() {
         Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
         Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString(), clock);
@@ -154,5 +242,15 @@ class ShaiTest {
         assertEquals(String.join(System.lineSeparator(),
                 "Here's the current lineup, King.",
                 "1.[D][ ] submit report (by: Sep 12 2026, 12:00 PM)"), shai.getResponse("list"));
+    }
+
+    /** Returns storage that consistently fails writes for rollback tests. */
+    private Storage failingStorage() {
+        return new Storage(temporaryDirectory.resolve("unused.txt").toString()) {
+            @Override
+            public void saveTasks(TaskList tasks) throws ShaiException {
+                throw new ShaiException("save failed");
+            }
+        };
     }
 }

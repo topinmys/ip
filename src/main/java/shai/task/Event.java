@@ -35,15 +35,22 @@ public class Event extends Task {
      * @param from the date or time when the event starts
      * @param to the date or time when the event ends
      * @param reminderMinutesBefore minutes before the event, or {@link Reminder#DISABLED}
-     * @throws AssertionError if an event time or reminder value is invalid
+     * @throws IllegalArgumentException if an event time or reminder value is invalid
      */
     public Event(String description, LocalDateTime from, LocalDateTime to, long reminderMinutesBefore) {
         super(description);
-        assert from != null : "An event must have a starting date or time.";
-        assert to != null : "An event must have an ending date or time.";
-        assert from.isBefore(to) : "An event must end after it starts.";
-        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
-                : "An event must have a valid reminder value.";
+        if (from == null) {
+            throw new IllegalArgumentException("An event must have a starting date or time.");
+        }
+        if (to == null) {
+            throw new IllegalArgumentException("An event must have an ending date or time.");
+        }
+        if (!from.isBefore(to)) {
+            throw new IllegalArgumentException("An event must end after it starts.");
+        }
+        if (!Reminder.isValidMinutesBefore(reminderMinutesBefore)) {
+            throw new IllegalArgumentException("An event must have a valid reminder value.");
+        }
         this.from = from;
         this.to = to;
         this.reminderMinutesBefore = reminderMinutesBefore;
@@ -74,8 +81,9 @@ public class Event extends Task {
 
     /** Sets the number of minutes before this event for its reminder. */
     public void setReminderMinutesBefore(long reminderMinutesBefore) {
-        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
-                : "An event must have a valid reminder value.";
+        if (!Reminder.isValidMinutesBefore(reminderMinutesBefore)) {
+            throw new IllegalArgumentException("An event must have a valid reminder value.");
+        }
         this.reminderMinutesBefore = reminderMinutesBefore;
     }
 

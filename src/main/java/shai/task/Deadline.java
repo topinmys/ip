@@ -30,13 +30,16 @@ public class Deadline extends Task {
      * @param description the text describing the Deadline
      * @param by the date or time by which the task should be completed
      * @param reminderMinutesBefore minutes before the deadline, or {@link Reminder#DISABLED}
-     * @throws AssertionError if the deadline or reminder value is invalid
+     * @throws IllegalArgumentException if the deadline or reminder value is invalid
      */
     public Deadline(String description, LocalDateTime by, long reminderMinutesBefore) {
         super(description);
-        assert by != null : "A deadline must have a date or time.";
-        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
-                : "A deadline must have a valid reminder value.";
+        if (by == null) {
+            throw new IllegalArgumentException("A deadline must have a date or time.");
+        }
+        if (!Reminder.isValidMinutesBefore(reminderMinutesBefore)) {
+            throw new IllegalArgumentException("A deadline must have a valid reminder value.");
+        }
         this.by = by;
         this.reminderMinutesBefore = reminderMinutesBefore;
     }
@@ -57,8 +60,9 @@ public class Deadline extends Task {
 
     /** Sets the number of minutes before this deadline for its reminder. */
     public void setReminderMinutesBefore(long reminderMinutesBefore) {
-        assert Reminder.isValidMinutesBefore(reminderMinutesBefore)
-                : "A deadline must have a valid reminder value.";
+        if (!Reminder.isValidMinutesBefore(reminderMinutesBefore)) {
+            throw new IllegalArgumentException("A deadline must have a valid reminder value.");
+        }
         this.reminderMinutesBefore = reminderMinutesBefore;
     }
 
