@@ -2,7 +2,9 @@ package shai.storage;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -99,7 +101,7 @@ public class Storage {
         try {
             Files.move(temporaryFile, taskFile,
                     StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        } catch (AtomicMoveNotSupportedException e) {
+        } catch (AtomicMoveNotSupportedException | FileAlreadyExistsException | AccessDeniedException e) {
             Files.move(temporaryFile, taskFile, StandardCopyOption.REPLACE_EXISTING);
         }
     }

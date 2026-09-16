@@ -1,17 +1,26 @@
 package shai.gui;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import shai.Shai;
 
 /** Controller for the main Shai GUI window. */
 public class MainWindow extends AnchorPane {
+    /** Full-window layer that centers the decorative background image. */
+    @FXML
+    private StackPane backgroundLayer;
+    /** Decorative image displayed behind the conversation. */
+    @FXML
+    private ImageView backgroundImage;
     @FXML
     private ScrollPane scrollPane;
     @FXML
@@ -23,11 +32,17 @@ public class MainWindow extends AnchorPane {
 
     private Shai shai;
 
-    private Image userImage = new Image(this.getClass().getResourceAsStream("/images/gj.jpg"));
-    private Image shaiImage = new Image(this.getClass().getResourceAsStream("/images/shai.jpg"));
+    /** Image displayed beside messages from the user. */
+    private final Image userImage = new Image(this.getClass().getResourceAsStream("/images/lebron.jpg"));
+    /** Image displayed beside Shai's replies. */
+    private final Image shaiImage = new Image(this.getClass().getResourceAsStream("/images/shai.jpg"));
 
     @FXML
     public void initialize() {
+        backgroundImage.fitWidthProperty().bind(backgroundLayer.widthProperty());
+        backgroundImage.fitHeightProperty().bind(backgroundLayer.heightProperty());
+        sendButton.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> userInput.getText().trim().isEmpty(), userInput.textProperty()));
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
     }
 
@@ -51,10 +66,16 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
+        if (input.trim().isEmpty()) {
+            return;
+        }
         String response = shai.getResponse(input);
+        DialogBox responseDialog = shai.wasLastResponseAnError()
+                ? DialogBox.getErrorDialog(response, shaiImage)
+                : DialogBox.getShaiDialog(response, shaiImage);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
-                DialogBox.getShaiDialog(response, shaiImage)
+                responseDialog
         );
         userInput.clear();
 

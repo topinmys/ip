@@ -18,7 +18,9 @@ import javafx.scene.shape.Circle;
 /** Represents a dialog box containing a speaker image and message text. */
 public class DialogBox extends HBox {
     /** Width and height of each circular avatar. */
-    private static final double AVATAR_SIZE = 56.0;
+    private static final double AVATAR_SIZE = 68.0;
+    /** Maximum portion of the conversation width occupied by message text. */
+    private static final double MAX_DIALOG_WIDTH_RATIO = 0.75;
 
     @FXML
     private Label dialog;
@@ -36,6 +38,7 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
+        dialog.maxWidthProperty().bind(widthProperty().multiply(MAX_DIALOG_WIDTH_RATIO));
         displayPicture.setImage(img);
         displayPicture.setPreserveRatio(false);
         displayPicture.setFitWidth(AVATAR_SIZE);
@@ -79,6 +82,13 @@ public class DialogBox extends HBox {
     public static DialogBox getShaiDialog(String text, Image img) {
         var db = new DialogBox(text, img);
         db.flip();
+        return db;
+    }
+
+    /** Creates a Shai response styled as an error message. */
+    public static DialogBox getErrorDialog(String text, Image img) {
+        var db = getShaiDialog(text, img);
+        db.dialog.getStyleClass().add("error-label");
         return db;
     }
 }

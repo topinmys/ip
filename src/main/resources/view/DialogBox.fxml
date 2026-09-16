@@ -15,10 +15,15 @@
          xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <Label fx:id="dialog" text="Label" wrapText="true" minHeight="-Infinity"/>
-        <ImageView fx:id="displayPicture" fitHeight="56.0" fitWidth="56.0" pickOnBounds="true" preserveRatio="false" />
+        <ImageView fx:id="displayPicture"
+                   fitHeight="68.0"
+                   fitWidth="68.0"
+                   pickOnBounds="true"
+                   preserveRatio="false"
+                   smooth="true" />
     </children>
     <padding>
-        <Insets bottom="10.0" left="8.0" right="8.0" top="10.0" />
+        <Insets bottom="6.0" left="8.0" right="8.0" top="6.0" />
     </padding>
     <stylesheets>
         <URL value="@../css/dialog-box.css" />
