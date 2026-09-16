@@ -1,6 +1,8 @@
 package shai;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
 import java.time.Clock;
@@ -59,6 +61,10 @@ class ShaiTest {
         Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
 
         assertEquals("Ayy, I don't know that command yet.", shai.getResponse("unknown"));
+        assertTrue(shai.wasLastResponseAnError());
+
+        shai.getResponse("list");
+        assertFalse(shai.wasLastResponseAnError());
     }
 
     @Test

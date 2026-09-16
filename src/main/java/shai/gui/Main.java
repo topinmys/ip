@@ -25,6 +25,7 @@ public class Main extends Application {
             mainWindow.showGreeting();
             stage.setMinHeight(420);
             stage.setMinWidth(640);
+            stage.setResizable(true);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
