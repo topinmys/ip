@@ -57,11 +57,11 @@ class ParserTest {
     }
 
     @Test
-    void parse_invalidInternalArguments_reportBrokenParserContracts() {
+    void parse_invalidArguments_reportUsefulErrors() {
         Parser parser = new Parser();
 
-        assertThrows(AssertionError.class, () -> parser.parse(null, 0));
-        assertThrows(AssertionError.class, () -> parser.parse("list", -1));
+        assertThrows(ShaiException.class, () -> parser.parse(null, 0));
+        assertThrows(IllegalArgumentException.class, () -> parser.parse("list", -1));
     }
 
     @Test
@@ -126,6 +126,23 @@ class ParserTest {
         assertParseError(parser,
                 "event team meeting /from 2019-12-01 1600 /to 2019-12-01 1400", 0,
                 "An event must end after it starts.");
+    }
+
+    @Test
+    void parse_ambiguousSyntax_isRejected() {
+        Parser parser = new Parser();
+
+        assertParseError(parser, "todo  buy milk", 0,
+                "Use a single space between command parameters, King.");
+        assertParseError(parser, "deadline report /by2026-01-01", 0,
+                "A deadline needs a date after /by. Try: deadline submit report /by 2019-12-01.");
+        assertParseError(parser, "deadline report /by 2026-01-01 /by 2026-01-02", 0,
+                "A deadline must contain exactly one /by parameter.");
+        assertParseError(parser, "remind 1 /before2h", 1,
+                "Call the reminder play like this: remind; remind <task number> /before <duration>; or "
+                        + "remind <task number> /off, King.");
+        assertParseError(parser, "mark +1", 1,
+                "The task number after mark must be a whole number.");
     }
 
     @Test

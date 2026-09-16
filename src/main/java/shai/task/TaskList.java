@@ -32,15 +32,29 @@ public class TaskList implements Iterable<Task> {
      * @param tasks tasks to copy into this list
      */
     public TaskList(List<Task> tasks) {
-        assert tasks != null : "The source task list must not be null.";
-        assert tasks.stream().allMatch(Objects::nonNull) : "A task list must not contain null tasks.";
+        if (tasks == null) {
+            throw new IllegalArgumentException("The source task list must not be null.");
+        }
+        if (!tasks.stream().allMatch(Objects::nonNull)) {
+            throw new IllegalArgumentException("A task list must not contain null tasks.");
+        }
         this.tasks = new ArrayList<>(tasks);
     }
 
     /** Adds a task to the end of the list. */
     public void add(Task task) {
-        assert task != null : "A task list must not contain null tasks.";
+        requireTask(task);
         tasks.add(task);
+    }
+
+    /** Adds a task at the supplied index.
+     *
+     * @param index insertion index
+     * @param task task to add
+     */
+    public void add(int index, Task task) {
+        requireTask(task);
+        tasks.add(index, task);
     }
 
     /** Gets a task by its zero-based index. */
@@ -60,7 +74,9 @@ public class TaskList implements Iterable<Task> {
 
     /** Returns a new list containing tasks whose descriptions contain a keyword. */
     public TaskList find(String keyword) {
-        assert keyword != null : "The search keyword must not be null.";
+        if (keyword == null) {
+            throw new IllegalArgumentException("The search keyword must not be null.");
+        }
         String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
         List<Task> matchingTasks = tasks.stream()
                 .filter(task -> task.getDescription().toLowerCase(Locale.ROOT)
@@ -76,7 +92,9 @@ public class TaskList implements Iterable<Task> {
      * @return reminders sorted by reminder time and then task-list index
      */
     public List<Reminder> findUpcomingReminders(LocalDateTime now) {
-        assert now != null : "The current time must not be null.";
+        if (now == null) {
+            throw new IllegalArgumentException("The current time must not be null.");
+        }
         LocalDateTime windowEnd = now.plusDays(UPCOMING_WINDOW_DAYS);
         List<Reminder> reminders = new ArrayList<>();
         for (int i = 0; i < tasks.size(); i++) {
@@ -107,7 +125,9 @@ public class TaskList implements Iterable<Task> {
      * @return reminders sorted by reminder time and then task-list index
      */
     public List<Reminder> findRemindersDueSoon(LocalDateTime now) {
-        assert now != null : "The current time must not be null.";
+        if (now == null) {
+            throw new IllegalArgumentException("The current time must not be null.");
+        }
         LocalDateTime windowEnd = now.plusHours(AUTOMATIC_REMINDER_WINDOW_HOURS);
         List<Reminder> reminders = new ArrayList<>();
         for (int i = 0; i < tasks.size(); i++) {
@@ -148,6 +168,13 @@ public class TaskList implements Iterable<Task> {
             return event.getFrom().minusMinutes(event.getReminderMinutesBefore());
         }
         return null;
+    }
+
+    /** Ensures that a task list never stores a null task. */
+    private static void requireTask(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("A task list must not contain null tasks.");
+        }
     }
 
     /**

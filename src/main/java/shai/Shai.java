@@ -44,6 +44,9 @@ public class Shai {
     /** Tracks whether the most recent programmatic response reported an error. */
     private boolean lastResponseWasError;
 
+    /** Prevents mutations from overwriting a task file that failed to load. */
+    private boolean storageReadyForWrites;
+
     /**
      * Creates Shai using the specified task-data file.
      *
@@ -55,6 +58,9 @@ public class Shai {
 
     /** Creates Shai using the specified task-data file and clock. */
     Shai(String filePath, Clock clock) {
+        if (clock == null) {
+            throw new IllegalArgumentException("The Shai clock must not be null.");
+        }
         ui = new Ui();
         this.clock = clock;
         parser = new Parser(clock);
@@ -62,9 +68,11 @@ public class Shai {
         TaskList loadedTasks;
         try {
             loadedTasks = storage.loadTasks();
+            storageReadyForWrites = true;
         } catch (ShaiException e) {
             ui.showLoadingError(e);
             loadedTasks = new TaskList();
+            storageReadyForWrites = false;
         }
         tasks = loadedTasks;
         shownReminderTimes = new HashMap<>();
@@ -130,6 +138,10 @@ public class Shai {
         try {
             Command command = parser.parse(input, tasks.size());
             assert command != null : "The parser must return a command for valid input.";
+            if (command.requiresStorageWrite() && !storageReadyForWrites) {
+                throw new ShaiException("I couldn't update your lineup because the task file could not be loaded. "
+                        + "Fix the task file before making changes, King.");
+            }
             command.execute(tasks, commandUi, storage);
             if (!command.isExit() && !input.trim().equals("remind")) {
                 showAutomaticReminders(commandUi);

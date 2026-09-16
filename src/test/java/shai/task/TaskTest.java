@@ -22,21 +22,21 @@ class TaskTest {
 
     @Test
     void constructor_nullDescription_reportsBrokenTaskContract() {
-        assertThrows(AssertionError.class, () -> new Task(null));
+        assertThrows(IllegalArgumentException.class, () -> new Task(null));
     }
 
     @Test
     void deadlineAndEvent_nullTimeValues_reportBrokenTaskContracts() {
-        assertThrows(AssertionError.class, () -> new Deadline("submit report", null));
-        assertThrows(AssertionError.class, () -> new Event("team meeting", null,
+        assertThrows(IllegalArgumentException.class, () -> new Deadline("submit report", null));
+        assertThrows(IllegalArgumentException.class, () -> new Event("team meeting", null,
                 LocalDateTime.of(2026, 9, 10, 10, 0)));
-        assertThrows(AssertionError.class, () -> new Event("team meeting",
+        assertThrows(IllegalArgumentException.class, () -> new Event("team meeting",
                 LocalDateTime.of(2026, 9, 10, 10, 0), null));
     }
 
     @Test
     void event_endBeforeStart_reportsBrokenTaskContract() {
-        assertThrows(AssertionError.class, () -> new Event("team meeting",
+        assertThrows(IllegalArgumentException.class, () -> new Event("team meeting",
                 LocalDateTime.of(2026, 9, 10, 12, 0),
                 LocalDateTime.of(2026, 9, 10, 10, 0)));
     }

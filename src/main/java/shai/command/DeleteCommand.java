@@ -21,7 +21,18 @@ public class DeleteCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
         Task task = tasks.remove(taskIndex);
+        try {
+            storage.saveTasks(tasks);
+        } catch (ShaiException exception) {
+            tasks.add(taskIndex, task);
+            throw exception;
+        }
         ui.showDeleted(task, tasks.size());
-        storage.saveTasks(tasks);
+    }
+
+    /** Returns whether deleting this task requires a storage write. */
+    @Override
+    public boolean requiresStorageWrite() {
+        return true;
     }
 }

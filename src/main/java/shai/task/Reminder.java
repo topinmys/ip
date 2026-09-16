@@ -19,9 +19,15 @@ public final class Reminder {
 
     /** Creates a reminder for a task at the supplied task-list index and time. */
     public Reminder(int taskIndex, Task task, LocalDateTime reminderTime) {
-        assert taskIndex >= 0 : "A reminder task index must not be negative.";
-        assert task != null : "A reminder must have a task.";
-        assert reminderTime != null : "A reminder must have a reminder time.";
+        if (taskIndex < 0) {
+            throw new IllegalArgumentException("A reminder task index must not be negative.");
+        }
+        if (task == null) {
+            throw new IllegalArgumentException("A reminder must have a task.");
+        }
+        if (reminderTime == null) {
+            throw new IllegalArgumentException("A reminder must have a reminder time.");
+        }
         this.taskIndex = taskIndex;
         this.task = task;
         this.reminderTime = reminderTime;

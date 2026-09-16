@@ -21,8 +21,22 @@ public class UnmarkCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws ShaiException {
         Task task = tasks.get(taskIndex);
+        boolean wasDone = task.isDone();
         task.unmark();
+        try {
+            storage.saveTasks(tasks);
+        } catch (ShaiException exception) {
+            if (wasDone) {
+                task.markAsDone();
+            }
+            throw exception;
+        }
         ui.showUnmarked(task);
-        storage.saveTasks(tasks);
+    }
+
+    /** Returns whether unmarking this task requires a storage write. */
+    @Override
+    public boolean requiresStorageWrite() {
+        return true;
     }
 }

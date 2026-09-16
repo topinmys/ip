@@ -26,11 +26,11 @@ class TaskListTest {
 
     @Test
     void taskList_nullTasks_reportBrokenCollectionContract() {
-        assertThrows(AssertionError.class, () -> new TaskList((List<Task>) null));
+        assertThrows(IllegalArgumentException.class, () -> new TaskList((List<Task>) null));
 
         TaskList taskList = new TaskList();
-        assertThrows(AssertionError.class, () -> taskList.add(null));
-        assertThrows(AssertionError.class, () -> taskList.find(null));
+        assertThrows(IllegalArgumentException.class, () -> taskList.add(null));
+        assertThrows(IllegalArgumentException.class, () -> taskList.find(null));
     }
 
     @Test

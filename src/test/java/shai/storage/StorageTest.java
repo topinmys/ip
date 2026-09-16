@@ -113,6 +113,16 @@ class StorageTest {
     }
 
     @Test
+    void loadTasks_unknownEscapeSequence_throwsLineSpecificError() throws Exception {
+        Path file = temporaryDirectory.resolve("tasks.txt");
+        Files.writeString(file, "T | 0 | invalid \\q\n");
+
+        ShaiException exception = assertThrows(ShaiException.class, () -> new Storage(file.toString()).loadTasks());
+
+        assertEquals("I couldn't load your lineup, King. The play on line 1 is invalid.", exception.getMessage());
+    }
+
+    @Test
     void saveTasks_nullTaskList_throwsUsefulError() {
         ShaiException exception = assertThrows(ShaiException.class, () -> storage().saveTasks(null));
 
