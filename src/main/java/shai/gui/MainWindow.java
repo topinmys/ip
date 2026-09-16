@@ -1,5 +1,6 @@
 package shai.gui;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -40,6 +41,8 @@ public class MainWindow extends AnchorPane {
     public void initialize() {
         backgroundImage.fitWidthProperty().bind(backgroundLayer.widthProperty());
         backgroundImage.fitHeightProperty().bind(backgroundLayer.heightProperty());
+        sendButton.disableProperty().bind(Bindings.createBooleanBinding(
+                () -> userInput.getText().trim().isEmpty(), userInput.textProperty()));
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
     }
 
@@ -63,6 +66,9 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
+        if (input.trim().isEmpty()) {
+            return;
+        }
         String response = shai.getResponse(input);
         DialogBox responseDialog = shai.wasLastResponseAnError()
                 ? DialogBox.getErrorDialog(response, shaiImage)

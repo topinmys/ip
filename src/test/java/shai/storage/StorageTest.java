@@ -74,6 +74,22 @@ class StorageTest {
     }
 
     @Test
+    void saveTasks_existingFile_replacesPreviousContents() throws ShaiException {
+        Storage storage = storage();
+        TaskList first = new TaskList();
+        first.add(new ToDo("first task"));
+        storage.saveTasks(first);
+
+        TaskList second = new TaskList();
+        second.add(new ToDo("second task"));
+        storage.saveTasks(second);
+
+        TaskList loaded = storage.loadTasks();
+        assertEquals(1, loaded.size());
+        assertEquals("second task", loaded.get(0).getDescription());
+    }
+
+    @Test
     void loadTasks_legacyTimedTasks_receiveDefaultReminders() throws Exception {
         Path file = temporaryDirectory.resolve("tasks.txt");
         Files.writeString(file, String.join(System.lineSeparator(),

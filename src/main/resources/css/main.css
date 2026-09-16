@@ -44,6 +44,12 @@
     -fx-border-width: 2px;
 }
 
+.button:disabled {
+    -fx-background-color: #334155;
+    -fx-text-fill: #94a3b8;
+    -fx-opacity: 1;
+}
+
 .scroll-pane,
 .scroll-pane .viewport {
     -fx-background-color: transparent;

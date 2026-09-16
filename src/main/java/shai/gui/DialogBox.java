@@ -19,6 +19,8 @@ import javafx.scene.shape.Circle;
 public class DialogBox extends HBox {
     /** Width and height of each circular avatar. */
     private static final double AVATAR_SIZE = 68.0;
+    /** Maximum portion of the conversation width occupied by message text. */
+    private static final double MAX_DIALOG_WIDTH_RATIO = 0.75;
 
     @FXML
     private Label dialog;
@@ -36,6 +38,7 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
+        dialog.maxWidthProperty().bind(widthProperty().multiply(MAX_DIALOG_WIDTH_RATIO));
         displayPicture.setImage(img);
         displayPicture.setPreserveRatio(false);
         displayPicture.setFitWidth(AVATAR_SIZE);
