@@ -47,7 +47,8 @@ public class TaskList implements Iterable<Task> {
         tasks.add(task);
     }
 
-    /** Adds a task at the supplied index.
+    /**
+     * Adds a task at the supplied index.
      *
      * @param index insertion index
      * @param task task to add

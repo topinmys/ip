@@ -39,12 +39,13 @@ public class MainWindow extends AnchorPane {
     /** Image displayed beside Shai's replies. */
     private final Image shaiImage = new Image(this.getClass().getResourceAsStream("/images/shai.jpg"));
 
+    /** Initializes bindings and layout behavior for the main window. */
     @FXML
     public void initialize() {
         backgroundImage.fitWidthProperty().bind(backgroundLayer.widthProperty());
         backgroundImage.fitHeightProperty().bind(backgroundLayer.heightProperty());
-        sendButton.disableProperty().bind(Bindings.createBooleanBinding(
-                () -> userInput.getText().trim().isEmpty(), userInput.textProperty()));
+        sendButton.disableProperty().bind(Bindings.createBooleanBinding(() ->
+                userInput.getText().trim().isEmpty(), userInput.textProperty()));
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
     }
 

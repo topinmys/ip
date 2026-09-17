@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -120,6 +121,49 @@ class StorageTest {
         ShaiException exception = assertThrows(ShaiException.class, () -> new Storage(file.toString()).loadTasks());
 
         assertEquals("I couldn't load your lineup, King. The play on line 1 is invalid.", exception.getMessage());
+    }
+
+    @Test
+    void loadTasks_malformedRecords_rejectsInvalidFields() throws Exception {
+        Path file = temporaryDirectory.resolve("tasks.txt");
+        List<String> malformedLines = List.of(
+                "T | 2 | invalid status",
+                "T | 0 | ",
+                "T | 0 | too many fields | extra",
+                "D | 0 | deadline | not-a-date",
+                "D | 0 | deadline | 2026-09-15 1700 | 2147483648",
+                "E | 0 | event | 2026-09-15 1600 | 2026-09-15 1400",
+                "E | 0 | event | 2026-09-15 1400 | 2026-09-15 1600 | invalid");
+
+        for (String malformedLine : malformedLines) {
+            Files.writeString(file, malformedLine);
+
+            ShaiException exception = assertThrows(ShaiException.class, () ->
+                    new Storage(file.toString()).loadTasks());
+
+            assertEquals("I couldn't load your lineup, King. The play on line 1 is invalid.",
+                    exception.getMessage());
+        }
+    }
+
+    @Test
+    void loadTasks_trailingEscapeCharacter_rejectsMalformedLine() throws Exception {
+        Path file = temporaryDirectory.resolve("tasks.txt");
+        Files.writeString(file, "T | 0 | description\\");
+
+        ShaiException exception = assertThrows(ShaiException.class, () ->
+                new Storage(file.toString()).loadTasks());
+
+        assertEquals("I couldn't load your lineup, King. The play on line 1 is invalid.",
+                exception.getMessage());
+    }
+
+    @Test
+    void loadTasks_directoryPath_throwsUsefulError() {
+        ShaiException exception = assertThrows(ShaiException.class, () ->
+                new Storage(temporaryDirectory.toString()).loadTasks());
+
+        assertEquals("I couldn't load your lineup, King. Check the task file.", exception.getMessage());
     }
 
     @Test

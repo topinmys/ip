@@ -126,4 +126,39 @@ class TaskListTest {
         assertEquals(0, reminders.get(0).getTaskIndex());
         assertEquals(1, reminders.get(1).getTaskIndex());
     }
+
+    @Test
+    void findUpcomingReminders_includesExactWindowBoundaries() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0);
+        Deadline atStart = new Deadline("at start", now, 0);
+        Deadline atWindowEnd = new Deadline("at window end", now.plusDays(7), 0);
+        Deadline afterWindow = new Deadline("after window", now.plusDays(7).plusMinutes(1), 0);
+        Deadline completed = new Deadline("completed", now.plusDays(1), 0);
+        completed.markAsDone();
+        Event event = new Event("event", now.plusDays(2), now.plusDays(2).plusHours(1), 0);
+        TaskList taskList = new TaskList(List.of(atStart, atWindowEnd, afterWindow, completed, event));
+
+        List<Reminder> reminders = taskList.findUpcomingReminders(now);
+
+        assertEquals(3, reminders.size());
+        assertEquals(0, reminders.get(0).getTaskIndex());
+        assertEquals(4, reminders.get(1).getTaskIndex());
+        assertEquals(1, reminders.get(2).getTaskIndex());
+    }
+
+    @Test
+    void findRemindersDueSoon_includesExactEndAndExcludesExactStart() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0);
+        Deadline atStart = new Deadline("at start", now, 0);
+        Deadline atWindowEnd = new Deadline("at window end", now.plusHours(24), 0);
+        Deadline afterWindow = new Deadline("after window", now.plusHours(24).plusMinutes(1), 0);
+        Event event = new Event("event", now.plusHours(12), now.plusHours(13), 0);
+        TaskList taskList = new TaskList(List.of(atStart, atWindowEnd, afterWindow, event));
+
+        List<Reminder> reminders = taskList.findRemindersDueSoon(now);
+
+        assertEquals(2, reminders.size());
+        assertEquals(3, reminders.get(0).getTaskIndex());
+        assertEquals(1, reminders.get(1).getTaskIndex());
+    }
 }

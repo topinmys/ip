@@ -84,6 +84,31 @@ class ShaiTest {
     }
 
     @Test
+    void getResponse_deleteMiddleTask_renumbersTasksAndPersistsChange() {
+        Path taskFile = temporaryDirectory.resolve("tasks.txt");
+        Shai shai = new Shai(taskFile.toString());
+        shai.getResponse("todo first");
+        shai.getResponse("todo middle");
+        shai.getResponse("todo last");
+
+        assertEquals(String.join(System.lineSeparator(),
+                "That one's been sent to the bench.",
+                "  [T][ ] middle",
+                "Roster updated, King. You now have 2 tasks on the board."),
+                shai.getResponse("delete 2"));
+        assertEquals(String.join(System.lineSeparator(),
+                "Here's the current lineup, King.",
+                "1.[T][ ] first",
+                "2.[T][ ] last"), shai.getResponse("list"));
+
+        Shai reloadedShai = new Shai(taskFile.toString());
+        assertEquals(String.join(System.lineSeparator(),
+                "Here's the current lineup, King.",
+                "1.[T][ ] first",
+                "2.[T][ ] last"), reloadedShai.getResponse("list"));
+    }
+
+    @Test
     void getResponse_bye_returnsKingGoodbye() {
         Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString());
 
@@ -139,8 +164,8 @@ class ShaiTest {
         TaskList tasks = new TaskList();
         tasks.add(task);
 
-        assertThrows(ShaiException.class,
-                () -> new DeleteCommand(0).execute(tasks, new Ui(), failingStorage()));
+        assertThrows(ShaiException.class, () ->
+                new DeleteCommand(0).execute(tasks, new Ui(), failingStorage()));
 
         assertEquals(1, tasks.size());
         assertSame(task, tasks.get(0));
@@ -152,13 +177,13 @@ class ShaiTest {
         TaskList tasks = new TaskList();
         tasks.add(task);
 
-        assertThrows(ShaiException.class,
-                () -> new MarkCommand(0).execute(tasks, new Ui(), failingStorage()));
+        assertThrows(ShaiException.class, () ->
+                new MarkCommand(0).execute(tasks, new Ui(), failingStorage()));
         assertFalse(task.isDone());
 
         task.markAsDone();
-        assertThrows(ShaiException.class,
-                () -> new UnmarkCommand(0).execute(tasks, new Ui(), failingStorage()));
+        assertThrows(ShaiException.class, () ->
+                new UnmarkCommand(0).execute(tasks, new Ui(), failingStorage()));
         assertTrue(task.isDone());
     }
 
@@ -168,8 +193,8 @@ class ShaiTest {
         TaskList tasks = new TaskList();
         tasks.add(deadline);
 
-        assertThrows(ShaiException.class,
-                () -> new ReminderCommand(0, 180,
+        assertThrows(ShaiException.class, () ->
+                new ReminderCommand(0, 180,
                         Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC")))
                                 .execute(tasks, new Ui(), failingStorage()));
 
@@ -206,6 +231,59 @@ class ShaiTest {
                 "  [D][ ] submit report (by: Sep 15 2026, 5:00 PM)"),
                 shai.getResponse("remind 1 /off"));
         assertEquals("No reminders on the board. Stay ready, King.", shai.getResponse("remind"));
+    }
+
+    @Test
+    void getResponse_eventReminder_canBeConfiguredAndDisabled() {
+        Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
+        Shai shai = new Shai(temporaryDirectory.resolve("tasks.txt").toString(), clock);
+        shai.getResponse("event team meeting /from 2026-09-15 1400 /to 2026-09-15 1600");
+
+        assertEquals(String.join(System.lineSeparator(),
+                "Locked in. I'll remind you at Sep 15 2026, 12:00 PM, King.",
+                "  [E][ ] team meeting (from: Sep 15 2026, 2:00 PM to: Sep 15 2026, 4:00 PM)"),
+                shai.getResponse("remind 1 /before 2h"));
+        assertEquals(String.join(System.lineSeparator(),
+                "That reminder's been benched, King.",
+                "  [E][ ] team meeting (from: Sep 15 2026, 2:00 PM to: Sep 15 2026, 4:00 PM)"),
+                shai.getResponse("remind 1 /off"));
+        assertEquals("No reminders on the board. Stay ready, King.", shai.getResponse("remind"));
+    }
+
+    @Test
+    void getResponse_pastReminder_rejectsChangeAndPreservesDefaultReminder() throws Exception {
+        Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
+        Path taskFile = temporaryDirectory.resolve("tasks.txt");
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("submit report", LocalDateTime.of(2026, 9, 11, 13, 0)));
+        new Storage(taskFile.toString()).saveTasks(tasks);
+        Shai shai = new Shai(taskFile.toString(), clock);
+
+        assertEquals("That reminder time is already in the past, King.",
+                shai.getResponse("remind 1 /before 2h"));
+        assertTrue(shai.wasLastResponseAnError());
+
+        TaskList reloadedTasks = new Storage(taskFile.toString()).loadTasks();
+        Deadline reloadedDeadline = (Deadline) reloadedTasks.get(0);
+        assertEquals(Reminder.DEFAULT_MINUTES_BEFORE, reloadedDeadline.getReminderMinutesBefore());
+    }
+
+    @Test
+    void getResponse_failedCommand_doesNotShowAutomaticReminderUntilSuccess() throws Exception {
+        Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
+        Path taskFile = temporaryDirectory.resolve("tasks.txt");
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("submit report", LocalDateTime.of(2026, 9, 12, 12, 0)));
+        new Storage(taskFile.toString()).saveTasks(tasks);
+        Shai shai = new Shai(taskFile.toString(), clock);
+
+        assertEquals("Turnover. Check your command, King.", shai.getResponse("unknown"));
+        assertEquals(String.join(System.lineSeparator(),
+                "Here's the current lineup, King.",
+                "1.[D][ ] submit report (by: Sep 12 2026, 12:00 PM)",
+                "Reminder alert, King. Time to lock in.",
+                "1.[D][ ] submit report (by: Sep 12 2026, 12:00 PM) "
+                        + "(reminder: Sep 11 2026, 12:00 PM)"), shai.getResponse("list"));
     }
 
     @Test
