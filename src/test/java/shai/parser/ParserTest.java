@@ -159,6 +159,32 @@ class ParserTest {
         assertEquals(180, deadline.getReminderMinutesBefore());
     }
 
+    @Test
+    void parse_invalidTaskNumbers_rejectsMalformedAndOutOfRangeValues() {
+        Parser parser = new Parser();
+
+        assertParseError(parser, "delete one", 1,
+                "The task number after delete must be a whole number.");
+        assertParseError(parser, "delete 0", 1, "That task number is not in your list yet.");
+        assertParseError(parser, "delete -1", 1,
+                "The task number after delete must be a whole number.");
+        assertParseError(parser, "delete 2", 1, "That task number is not in your list yet.");
+        assertParseError(parser, "delete 2147483648", 1,
+                "The task number after delete must be a whole number.");
+    }
+
+    @Test
+    void parse_reminderDurations_acceptsZeroAndMaximumButRejectsOverflow() throws ShaiException {
+        Parser parser = new Parser();
+
+        assertInstanceOf(ReminderCommand.class, parser.parse("remind 1 /before 0m", 1));
+        assertInstanceOf(ReminderCommand.class, parser.parse("remind 1 /before 2147483647m", 1));
+        assertParseError(parser, "remind 1 /before 2147483648m", 1,
+                "That reminder duration is too large, King.");
+        assertParseError(parser, "remind 1 /before 35791395h", 1,
+                "That reminder duration is too large, King.");
+    }
+
     private Storage storage() {
         return new Storage(temporaryDirectory.resolve("tasks.txt").toString());
     }
