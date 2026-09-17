@@ -216,6 +216,21 @@ class ShaiTest {
     }
 
     @Test
+    void getResponse_remind_listsMissedReminderForUpcomingTask() throws Exception {
+        Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
+        Path taskFile = temporaryDirectory.resolve("tasks.txt");
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("submit report", LocalDateTime.of(2026, 9, 12, 0, 0)));
+        new Storage(taskFile.toString()).saveTasks(tasks);
+        Shai shai = new Shai(taskFile.toString(), clock);
+
+        assertEquals(String.join(System.lineSeparator(),
+                "Missed reminders, King. Handle these while they're still upcoming:",
+                "1.[D][ ] submit report (by: Sep 12 2026) "
+                        + "(missed reminder: Sep 11 2026)"), shai.getResponse("remind"));
+    }
+
+    @Test
     void getResponse_remindConfiguration_updatesAndPersistsReminder() {
         Clock clock = Clock.fixed(Instant.parse("2026-09-11T12:00:00Z"), ZoneId.of("UTC"));
         Path taskFile = temporaryDirectory.resolve("tasks.txt");

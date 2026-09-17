@@ -1089,3 +1089,47 @@ This plan describes black-box tests for the `Shai` command-line interface.
 	____________________________________________________________
 
   ```
+
+## Test Case 23: Show missed reminders for upcoming tasks
+
+- Aim: Verify that a reminder whose scheduled time has passed is still shown
+  separately when its deadline remains upcoming.
+- Command: `java -cp _temp\test-ui\classes shai.Shai`
+- Inputs:
+
+  ```text
+  deadline submit report /by 2026-09-18
+  remind
+  bye
+  ```
+
+- Expected output:
+
+  ```text
+	____________________________________________________________
+	  ____  _           _
+	 / ___|| |__   __ _(_)
+	 \___ \| '_ \ / _` | |
+	  ___) | | | | (_| | |
+	 |____/|_| |_|\__,_|_|
+	Yo, I'm Shai. What's good, King? Ready to get things done?
+	____________________________________________________________
+
+	____________________________________________________________
+	Added to the lineup, King.
+	  [D][ ] submit report (by: Sep 18 2026)
+	Roster updated, King. You now have 1 tasks on the board.
+	Reminder alert, King. Time to lock in.
+	1.[D][ ] submit report (by: Sep 18 2026) (reminder: Sep 17 2026)
+	____________________________________________________________
+
+	____________________________________________________________
+	Missed reminders, King. Handle these while they're still upcoming:
+	1.[D][ ] submit report (by: Sep 18 2026) (missed reminder: Sep 17 2026)
+	____________________________________________________________
+
+	____________________________________________________________
+	Until next time, King. Keep winning.
+	____________________________________________________________
+
+  ```

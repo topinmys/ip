@@ -87,7 +87,8 @@ public class TaskList implements Iterable<Task> {
     }
 
     /**
-     * Returns incomplete reminders scheduled within the next seven days.
+     * Returns incomplete reminders scheduled within the next seven days,
+     * including missed reminders for tasks that are still upcoming.
      *
      * @param now the current time used as the start of the window
      * @return reminders sorted by reminder time and then task-list index
@@ -102,9 +103,14 @@ public class TaskList implements Iterable<Task> {
             Task task = tasks.get(i);
             LocalDateTime targetTime = getTargetTime(task);
             LocalDateTime reminderTime = getReminderTime(task);
-            if (task.isDone() || targetTime == null || reminderTime == null
-                    || targetTime.isBefore(now) || reminderTime.isBefore(now)
-                    || reminderTime.isAfter(windowEnd)) {
+            if (task.isDone() || targetTime == null || reminderTime == null) {
+                continue;
+            }
+            boolean isReminderUpcoming = !reminderTime.isBefore(now);
+            boolean isUpcomingTaskWithMissedReminder = reminderTime.isBefore(now)
+                    && targetTime.isAfter(now) && !targetTime.isAfter(windowEnd);
+            if (targetTime.isBefore(now) || reminderTime.isAfter(windowEnd)
+                    || (!isReminderUpcoming && !isUpcomingTaskWithMissedReminder)) {
                 continue;
             }
             reminders.add(new Reminder(i, task, reminderTime));

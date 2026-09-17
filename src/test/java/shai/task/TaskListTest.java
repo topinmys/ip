@@ -147,6 +147,22 @@ class TaskListTest {
     }
 
     @Test
+    void findUpcomingReminders_includesMissedReminderForUpcomingTask() {
+        LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0);
+        Deadline missed = new Deadline("missed", LocalDateTime.of(2026, 9, 12, 0, 0));
+        Deadline upcoming = new Deadline("upcoming", LocalDateTime.of(2026, 9, 15, 12, 0));
+        Deadline outsideWindow = new Deadline("outside", LocalDateTime.of(2026, 9, 20, 12, 0));
+        Deadline overdue = new Deadline("overdue", LocalDateTime.of(2026, 9, 10, 12, 0));
+        TaskList taskList = new TaskList(List.of(missed, upcoming, outsideWindow, overdue));
+
+        List<Reminder> reminders = taskList.findUpcomingReminders(now);
+
+        assertEquals(2, reminders.size());
+        assertEquals(0, reminders.get(0).getTaskIndex());
+        assertEquals(1, reminders.get(1).getTaskIndex());
+    }
+
+    @Test
     void findRemindersDueSoon_includesExactEndAndExcludesExactStart() {
         LocalDateTime now = LocalDateTime.of(2026, 9, 11, 12, 0);
         Deadline atStart = new Deadline("at start", now, 0);

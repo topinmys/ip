@@ -136,10 +136,32 @@ public class Ui {
             return;
         }
 
-        output.println("\tHere's the reminder lineup, King.");
+        List<Reminder> upcomingReminders = reminders.stream()
+                .filter(reminder -> !reminder.getReminderTime().isBefore(now))
+                .toList();
+        List<Reminder> missedReminders = reminders.stream()
+                .filter(reminder -> reminder.getReminderTime().isBefore(now))
+                .toList();
+
+        if (!upcomingReminders.isEmpty()) {
+            output.println("\tHere's the reminder lineup, King.");
+            showReminderLines(upcomingReminders, "reminder");
+        }
+        if (!missedReminders.isEmpty()) {
+            if (!upcomingReminders.isEmpty()) {
+                output.println();
+            }
+            output.println("\tMissed reminders, King. Handle these while they're still upcoming:");
+            showReminderLines(missedReminders, "missed reminder");
+        }
+    }
+
+    /** Prints reminders with the supplied label for their scheduled time. */
+    private void showReminderLines(List<Reminder> reminders, String timeLabel) {
         for (Reminder reminder : reminders) {
             output.println("\t" + (reminder.getTaskIndex() + 1) + "." + reminder.getTask()
-                    + " (reminder: " + DateTimeParser.formatForDisplay(reminder.getReminderTime()) + ")");
+                    + " (" + timeLabel + ": "
+                    + DateTimeParser.formatForDisplay(reminder.getReminderTime()) + ")");
         }
     }
 

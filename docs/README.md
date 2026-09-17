@@ -39,8 +39,9 @@ List reminders scheduled within the next seven days:
 remind
 ```
 
-Reminders are listed chronologically. Completed, disabled, past, and more
-distant reminders are not shown.
+Reminders are listed chronologically. If a reminder time has passed but its
+deadline or event is still upcoming, it appears in a separate `Missed reminders`
+section. Completed, disabled, overdue, and more distant tasks are not shown.
 
 Configure a reminder using minutes (`m`), hours (`h`), or days (`d`):
 
