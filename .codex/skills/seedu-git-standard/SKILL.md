@@ -5,6 +5,16 @@ description: Apply the SE-EDU Git conventions when naming branches and creating 
 
 # SE-EDU Git Standard
 
+## High-priority commit requirement
+
+For every commit, every commit-body line must be no more than
+72 characters long, including spaces and punctuation. This is
+mandatory, not optional.
+Before running `git commit`, measure each body line and rewrap
+any line that exceeds 72 characters; only commit after the
+check passes. Apply this rule to every commit, including trivial
+and follow-up commits.
+
 Use this skill for Git work in this repository. Follow the
 [SE-EDU Git conventions](https://se-education.org/guides/conventions/git.html)
 and keep changes scoped to the user's request.
@@ -22,7 +32,10 @@ and keep changes scoped to the user's request.
 
 - Add a body for non-trivial commits, separated from the subject by one blank
   line.
-- Wrap body lines at 72 characters and use blank lines between paragraphs.
+- Wrap every body line at no more than 72 characters and use blank lines
+  between paragraphs.
+- Treat the 72-character limit as a hard requirement; verify it before
+  committing.
 - Explain WHAT changed and WHY it changed; the diff explains HOW.
 - Prefer this order: current situation, why it needs to change, what to do,
   why that approach is appropriate, and any other relevant information.
