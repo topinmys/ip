@@ -8,9 +8,16 @@ ToDos, deadlines, and events on the board, then focus on making your next play.
 ## Quick start
 
 1. Make sure JDK 25 is installed.
-2. From the project folder, run `.\gradlew.bat run` on Windows or `./gradlew run`
-   on macOS/Linux. You can also run `shai.gui.Launcher` from IntelliJ. These
-   options open Shai's graphical interface.
+2. If you downloaded `shai.jar`, open a terminal in its folder and run:
+
+   ```text
+   java -jar shai.jar
+   ```
+
+   To run Shai from the project source instead, use `.\gradlew.bat run` on
+   Windows or `./gradlew run` on macOS/Linux. You can also run
+   `shai.gui.Launcher` from IntelliJ. These options open Shai's graphical
+   interface.
 3. To use the command-line interface from IntelliJ, run `shai.Shai` instead.
 4. Type a command into the input box and click **Run Play**. In the command-line
    interface, type a command and press Enter instead.
